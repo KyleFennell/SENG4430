@@ -19,7 +19,7 @@ public class Logger {
             case "log":
                 LOG_ON = val.equals("on");
                 break;
-            case "warn":
+            case "warning":
                 WARN_ON = val.equals("on");
                 break;
             case "error":
@@ -29,7 +29,7 @@ public class Logger {
                 DEBUG_ON = val.equals("on");
                 break;
             default:
-                warn("Unknown type " + type);
+                warning("Unknown type " + type);
                 return;
         }
         log(type + " logging toggled " + val);
@@ -41,7 +41,7 @@ public class Logger {
         }
     }
 
-    public static void warn(String msg) {
+    public static void warning(String msg) {
         if (WARN_ON) {
             System.out.println(context() + "Warning: " + msg);
         }
