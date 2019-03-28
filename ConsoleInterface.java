@@ -1,3 +1,13 @@
+/**
+ * Project      : Software Quality Assignment 1
+ * Class name   : ConsoleInterface
+ * Author(s)    : Kyle Fennell
+ * Date         : 28/03/19
+ * Purpose      : This is the interface between the terminal and the program.
+ *      It is essentially a command line parser but also controls the flow of
+ *      the program due to Command objects being executed.
+ */
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -8,10 +18,17 @@ public class ConsoleInterface{
 
     private List<Command> m_commands = new ArrayList<>();
 
+    /**
+     * Class constructor
+     */
     public ConsoleInterface(){
         initCommands();
     }
 
+    /**
+     * Waits for a command to be typed then locates the respective Command object
+     * and executes it with the following words as the arguments to the command.
+     */
     public void run(){
         Scanner input = new Scanner(System.in);
         String line = "";
@@ -25,6 +42,10 @@ public class ConsoleInterface{
         }
     }
 
+    /**
+     * @param command full string containing the command followed by the arguements
+     * @return null on failure, "" on success
+     */
     private String parseCommand(String command){
         Logger.debug("parse command: '" + command + "'");
         if (command.equals("")){
@@ -39,10 +60,15 @@ public class ConsoleInterface{
                 return "";
             }
         }
-        Logger.warning("command not found");
+        Logger.log("command not found. try 'help's");
         return null;
     }
 
+    /**
+     * @param name of the command requested
+     * @return Command object that matches @param name
+     *      null of failure to find command
+     */
     private Command getCommandByName(String name){
         for (Command c : m_commands){
             if (c.getCommandName().toLowerCase().equals(name.toLowerCase())){
@@ -52,6 +78,9 @@ public class ConsoleInterface{
         return null;
     }
 
+    /** Lists all commands and their arguement format
+     * @return string of all commands
+     */
     private String listCommands(){
         String out = "";
         for (Command c : m_commands){
@@ -60,6 +89,9 @@ public class ConsoleInterface{
         return out;
     }
 
+    /**
+     * Creates all Command objects and adds them to m_commands
+     */
     private void initCommands(){
 
         m_commands.add(new Command(
@@ -187,6 +219,15 @@ public class ConsoleInterface{
         });
     }
 
+    /**
+     * Compares 2 string arrays and if one matches all the elements up to its length
+     * in the other then they are deemed equal.
+     * e.g. arrayEquals([cat, dog, yes], [cat, dog]) returns 2
+     * @param in1 first string array
+     * @param in2 second string array
+     * @return the length of the shorter string on success
+     *      -1 on failure
+     */
     private int arrayEquals(String[] in1, String[] in2){
         Logger.debug("comparing " + printArray(in1) + " " + printArray(in2));
         String[] arr1 = in1.length <= in2.length? in1 : in2;
@@ -200,6 +241,11 @@ public class ConsoleInterface{
         return arr1.length;
     }
 
+    /**
+     * toString for String arrays
+     * @param arr the array to print
+     * @return "[ elem1, elem2, ... ]"
+     */
     private String printArray(String[] arr){
         String output = "[ ";
         for (String s : arr){
@@ -208,6 +254,12 @@ public class ConsoleInterface{
         return output + "]";
     }
 
+    /**
+     * @param in array being split
+     * @param index to split on
+     * @return the elements of the array after the index,
+     *      empty array if index is greater than length
+     */
     private String[] splitArray(String[] in, int index){
         if (in.length-index < 0){
             Logger.error("index greater than array length");
@@ -219,13 +271,24 @@ public class ConsoleInterface{
         }
         return out;
     }
-
+    /**
+     * Project      : Software Quality Assignment 1
+     * Class name   : Command
+     * Author(s)    : Kyle Fennell
+     * Date         : 28/03/19
+     * Purpose      : Container class + execution method
+     */
     private abstract class Command{
 
         private String m_commandName;
         private String m_help;
         private String m_format;
 
+        /**
+         * @param commandName Name of the command
+         * @param help string explaining command function
+         * @param format the argument format expected/required
+         */
         public Command(String commandName, String help, String format){
             m_commandName = commandName;
             m_help = help;
@@ -244,6 +307,12 @@ public class ConsoleInterface{
             return m_commandName + " " + m_format;
         }
 
+        /**
+         * override this command on instantiation with logic that will be
+         * executed by the command.
+         * @param params arguments to be fed into the command
+         * @return null on failure
+         */
         //override this on construction
         public abstract String execute(String[] params);
     }

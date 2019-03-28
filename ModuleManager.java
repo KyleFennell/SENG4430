@@ -1,3 +1,12 @@
+/**
+ * Project      : Software Quality Assignment 1
+ * Class name   : ModuleManager
+ * Author(s)    : Kyle Fennell
+ * Date         : 28/03/19
+ * Purpose      : Manages all modules in the system including getting,
+ *      registering and running them.
+ */
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -6,6 +15,13 @@ public class ModuleManager {
     private static List<ModuleInterface> m_modules = new ArrayList<>();
     private static List<ModuleInterface> m_loadedModules = new ArrayList<>();
 
+    /**
+     * Notifies the Manager about the module
+     * @param module instance of the module to be managed
+     * @return
+     *      true on success
+     *      false if module is already found
+     */
     public static boolean registerModule(ModuleInterface module){
         for (ModuleInterface m : m_modules){
             if (m.getName().toLowerCase().equals(module.getName().toLowerCase())){
@@ -18,6 +34,9 @@ public class ModuleManager {
         return true;
     }
 
+    /**
+     * @return list of all modules currently available in the manager
+     */
     public static String listModules(){
         String list = "";
 
@@ -29,6 +48,10 @@ public class ModuleManager {
         return list;
     }
 
+    /**
+     * @return lists all the active (loaded) modules that will be executed
+     *      when run
+     */
     public static String listLoadedModules(){
         String list = "";
 
@@ -40,6 +63,10 @@ public class ModuleManager {
         return list;
     }
 
+    /**
+     * @param name
+     * @return the module that matches the name
+     */
     public static ModuleInterface getModuleByName(String name){
         for (ModuleInterface m : m_modules){
             if (m.getName().toLowerCase().equals(name.toLowerCase())){
@@ -50,6 +77,10 @@ public class ModuleManager {
         return null;
     }
 
+    /**
+     * @param m name of the module to load
+     * @return true if successfully added
+     */
     public static boolean loadModule(String m){
         if (m_loadedModules.contains(getModuleByName(m))){
             Logger.log("module " + m + " already loaded");
@@ -62,6 +93,10 @@ public class ModuleManager {
         return false;
     }
 
+    /**
+     * Unloads all modules
+     * @return true
+     */
     public static boolean clearModules(){
         if (m_loadedModules.isEmpty()){
             Logger.warning("no modules loaded.");
@@ -71,6 +106,11 @@ public class ModuleManager {
         return true;
     }
 
+    /**
+     * @param m name of module to unload
+     * @return true on success
+     *      false if module was not found.
+     */
     public static boolean unloadModule(String m){
         if (m_loadedModules.contains(getModuleByName(m))){
             m_loadedModules.remove(getModuleByName(m));
