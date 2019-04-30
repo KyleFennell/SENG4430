@@ -1,22 +1,32 @@
-/**
- * Project      : Software Quality Assignment 1
- * Class name   : ConsoleInterface
- * Author(s)    : Kyle Fennell
- * Date         : 28/03/19
- * Purpose      : This is the interface between the terminal and the program.
- *      It is essentially a command line parser but also controls the flow of
- *      the program due to Command objects being executed.
- */
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.utils.SourceRoot;
+import modules.LengthOfCode;
+import modules.ModuleInterface;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Project          : Software Quality Assignment 1
+ * Class name       : ConsoleInterface
+ * Author(s)        : Kyle Fennell
+ * Contributor(s)   : Ben Collins
+ * Date             : 28/03/19
+ * Purpose          : This is the interface between the terminal and the program.
+ *      It is essentially a command line parser but also controls the flow of
+ *      the program due to Command objects being executed.
+ */
+
 public class ConsoleInterface{
 
     private List<Command> m_commands = new ArrayList<>();
+    private static SourceRoot sourceRoot;
 
     /**
      * Class constructor
@@ -30,6 +40,8 @@ public class ConsoleInterface{
      * and executes it with the following words as the arguments to the command.
      */
     public void run(){
+        registerModules();
+
         Scanner input = new Scanner(System.in);
         String line = "";
         while (true){
@@ -40,6 +52,14 @@ public class ConsoleInterface{
                 Logger.warning("command returned null");
             }
         }
+    }
+
+    /**
+     * Register all Modules available to the ModuleManager
+     */
+    private void registerModules(){
+        ModuleInterface lengthOfCode = new LengthOfCode();
+        ModuleManager.registerModule(lengthOfCode);
     }
 
     /**
@@ -157,31 +177,20 @@ public class ConsoleInterface{
         });
 
         m_commands.add(new Command(
-                "load file",
-                "loads a file to the program",
-                "<filePath>") {
+                "load path",
+                "loads the files in the program path",
+                "<folderPath>") {
             @Override
             public String execute(String[] args) {
-                Logger.debug("Executing Load File Command");
-                String fileContents = null;
+                Logger.debug("Executing Load Path Command");
 
                 if (args.length != 1) {
                     Logger.error("Command 'Load' - Expects 1 argument. Received " + args.length);
                     return null;
                 }
 
-                try {
-                    Scanner file = new Scanner(new File(args[0]));
-                    while (file.hasNextLine()) {
-                        fileContents += file.nextLine() + "\n";
-                    }
-                } catch (FileNotFoundException e) {
-                    Logger.error("Command 'Load' - File not found.");
-                    return null;
-                }
-                if (fileContents == null) {
-                    Logger.warning("Command 'Load' - The file has no contents.");
-                }
+                sourceRoot = new SourceRoot(Paths.get(args[0]));
+
                 return "";
             }
         });
@@ -214,6 +223,32 @@ public class ConsoleInterface{
                     return null;
                 }
                 Logger.toggle(args[0], args[1]);
+                return "";
+            }
+        });
+
+        m_commands.add(new Command(
+                "run",
+                "run the loaded modules",
+                "<>"){
+            @Override
+            public String execute(String[] args){
+                if (args.length != 0) {
+                    Logger.error("Command 'Run' - Expects no arguments. Received " + args.length);
+                    return null;
+                }
+                List<ModuleInterface> loadedModules = ModuleManager.getLoadedModules();
+
+                List<String[]> allResults = new ArrayList<>();
+                List<String> allMetrics = new ArrayList<>();
+
+                for (ModuleInterface module : loadedModules) {
+                    allResults.add(module.executeModule(sourceRoot));
+                    allMetrics.add(module.printMetrics());
+                }
+
+                //TODO: Whatever is to be done with output
+
                 return "";
             }
         });
