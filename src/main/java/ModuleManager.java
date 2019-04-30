@@ -1,19 +1,30 @@
-/**
- * Project      : Software Quality Assignment 1
- * Class name   : ModuleManager
- * Author(s)    : Kyle Fennell
- * Date         : 28/03/19
- * Purpose      : Manages all modules in the system including getting,
- *      registering and running them.
- */
+import modules.ModuleInterface;
 
 import java.util.ArrayList;
 import java.util.List;
+
+/**
+ * Project          : Software Quality Assignment 1
+ * Class name       : ModuleManager
+ * Author(s)        : Kyle Fennell
+ * Contributor(s)   : Ben Collins
+ * Date             : 28/03/19
+ * Purpose          : Manages all modules in the system including getting,
+ *                  registering and running them.
+ */
 
 public class ModuleManager {
 
     private static List<ModuleInterface> m_modules = new ArrayList<>();
     private static List<ModuleInterface> m_loadedModules = new ArrayList<>();
+
+    /**
+     * Get the list of loaded modules as modules.ModuleInterface Objects
+     * @return ArrayList of loaded modules
+     */
+    public static List<ModuleInterface> getLoadedModules() {
+        return m_loadedModules;
+    }
 
     /**
      * Notifies the Manager about the module
