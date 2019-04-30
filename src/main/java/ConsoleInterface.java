@@ -1,7 +1,10 @@
+import com.github.javaparser.ParseResult;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
 import modules.LengthOfCode;
 import modules.ModuleInterface;
 
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -232,6 +235,19 @@ public class ConsoleInterface{
                     Logger.error("Command 'Run' - Expects no arguments. Received " + args.length);
                     return null;
                 }
+
+                if (sourceRoot == null) {
+                    Logger.error("Command 'Run' - Requires valid code files.");
+                    return null;
+                }
+
+                try {
+                    List<ParseResult<CompilationUnit>> parseResults = sourceRoot.tryToParse();
+                } catch (IOException e) {
+                    Logger.error("Error occurred while attempting to parse files. " +
+                            "Please try again with valid source files");
+                }
+
                 List<ModuleInterface> loadedModules = ModuleManager.getLoadedModules();
 
                 List<String[]> allResults = new ArrayList<>();
