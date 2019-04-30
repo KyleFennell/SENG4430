@@ -1,3 +1,8 @@
+import modules.ModuleInterface;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Project          : Software Quality Assignment 1
  * Class name       : ModuleManager
@@ -7,11 +12,6 @@
  * Purpose          : Manages all modules in the system including getting,
  *                  registering and running them.
  */
-
-import modules.ModuleInterface;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ModuleManager {
 
