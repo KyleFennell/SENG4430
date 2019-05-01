@@ -8,11 +8,9 @@ import com.github.javaparser.utils.SourceRoot;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class NumberOfComments implements ModuleInterface {
 
@@ -103,19 +101,37 @@ public class NumberOfComments implements ModuleInterface {
 	 * @return the optimal value of comments that fall under the sub-class of TO-DO
 	 */
 	private double todoSubmetric() {
-		if (IS_INDEPENDENT)
-			return 1; // TODO (ironic) Print location and recommend that TODO should be implemented
 
-		List<Comment> allComments = new ArrayList<>();
+		List<String> criteria = new ArrayList<>(Arrays.asList("todo", "to-do"));
 
-		for (CompilationUnit cu : sourceRoot.getCompilationUnits()) {
-			allComments.addAll(cu.getAllContainedComments());
+		int todoFound = 0;
+		int totalComments = 0;
+
+		for (CompilationUnit unit : sourceRoot.getCompilationUnits()) {
+			for (Comment com : unit.getAllContainedComments()) {
+				if (criteria.parallelStream().anyMatch(com.getContent().toLowerCase()::contains)) {
+
+					System.out.println(unit.getPrimaryTypeName().get() + "::"
+											   + com.getRange().get().begin.line + " = \""
+											   + com.getContent() + "\"");
+					todoFound++;
+				}
+			}
+			totalComments += unit.getAllContainedComments().size();
 		}
-		// System.out.println(allComments.toString());
 
+		System.out.println(System.lineSeparator() + "Summary: ");
+		System.out.println("\tComments found: " +  totalComments + System.lineSeparator() +"\tTODO found: " + todoFound);
 
+		if (IS_INDEPENDENT && todoFound > 0) {
+			System.out.println("Recommendation: " + System.lineSeparator() + "\tIndependently developed code will receive the optimal value for this sub metric, however, it is recommended that the above TODOs be implemented or removed.");
+			return 1;
+		}
 
-		return 0.0;
+		if (totalComments == 0)
+			return 0;
+
+		return 1 / ( (Math.pow(todoFound, Math.E)/totalComments) + 1 );
 	}
 
 
