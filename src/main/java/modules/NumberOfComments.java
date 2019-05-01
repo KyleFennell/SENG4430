@@ -2,11 +2,13 @@ package modules;
 
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.utils.SourceRoot;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,9 +16,12 @@ import java.util.stream.Collectors;
 
 public class NumberOfComments implements ModuleInterface {
 
-	private static final String ANALYSIS_ROOT = "C:/Users/PapaCache/Desktop/SENG4430/MultipleFiles/ttClasses/src";
+	private static final String ANALYSIS_ROOT = "resources/Example1";
 	private static SourceRoot sourceRoot;
-	private static List<CompilationUnit> compilationUnits;
+	private static Map<Path, String> classesAndLocation;
+
+	private static boolean IS_INDEPENDENT = false;
+
 
 	@Override
 	public String getName() {
@@ -37,50 +42,56 @@ public class NumberOfComments implements ModuleInterface {
 
 	// ! OVERLOADED FOR DRIVER CLASS
 	public String[] executeModule() {
-		executeModule(sourceRoot);
-		return null;
+		return executeModule(sourceRoot);
 	}
-
 	@Override
 	public String[] executeModule(SourceRoot sourceRoot) {
 
-		boolean isInitialised = init();
-		if (isInitialised) {
+		if (init()) {
 			System.out.println("Files being Analysed: ");
-			printFilesAndLocation(compilationUnits);
+			printFilesAndLocation();
 			System.out.println(System.lineSeparator());
-		} else
-			throw new IllegalStateException("Failed to initialise correctly. Incorrect or empty location.");
+		} else {
+			throw new IllegalStateException("Failed to initialise correctly. Wrong or empty folder.");
+		}
+
+		// Begin analysing:
+		todoSubmetric();
 
 
 		return new String[0];
 	}
 
-
-	private boolean init() {
-		sourceRoot = new SourceRoot(Paths.get(ANALYSIS_ROOT));
+	/*
+		The methods here were developed with the idea of being able to analyse a file directly OR an entire root.
+		At this point in time, they are redundant but may add that extra function if decided to be implemented but I
+		will still override here just to show it works.
+	 */
+	private static boolean init() {
+		return init(ANALYSIS_ROOT);
+	}
+	private static boolean init(String folderLocation) {
+		sourceRoot = new SourceRoot(Paths.get(folderLocation));
 		try {
 			List<ParseResult<CompilationUnit>> parseResults = sourceRoot.tryToParse();
-			compilationUnits = parseResults
-									   .stream().filter(ParseResult::isSuccessful)
-									   .map(r -> r.getResult().get())
-									   .collect(Collectors.toList());
-			return true;
+			return getNameLocationMap(parseResults
+											  .stream().filter(ParseResult::isSuccessful)
+											  .map(r -> r.getResult().get())
+											  .collect(Collectors.toList())
+									 );
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return false;
 	}
-
-	private static Map<Path, String> getNameLocationMap(List<CompilationUnit> cu) {
-		Map<Path, String> classAndLocation = new HashMap<>();
+	private static boolean getNameLocationMap(List<CompilationUnit> cu) {
+		classesAndLocation = new HashMap<>();
 		for (CompilationUnit compilationUnit : cu)
-			classAndLocation.put(compilationUnit.getStorage().get().getPath(), compilationUnit.getStorage().get().getFileName());
-		return classAndLocation;
+			classesAndLocation.put(compilationUnit.getStorage().get().getPath(), compilationUnit.getStorage().get().getFileName());
+		return !classesAndLocation.isEmpty();
 	}
-
-	private static void printFilesAndLocation(List<CompilationUnit> compilationUnits) {
-		getNameLocationMap(compilationUnits).forEach((k, v) -> System.out.println("\t * " + v + System.lineSeparator() + "\t\t ^ " + k));
+	private static void printFilesAndLocation() {
+		classesAndLocation.forEach((k, v) -> System.out.println("\t * " + v + System.lineSeparator() + "\t\t ^ " + k));
 	}
 
 	/**
@@ -91,7 +102,16 @@ public class NumberOfComments implements ModuleInterface {
 	 *
 	 * @return the optimal value of comments that fall under the sub-class of TO-DO
 	 */
-	private double todoSubmetric(SourceRoot sourceRoot) {
+	private double todoSubmetric() {
+		if (IS_INDEPENDENT)
+			return 1; // TODO (ironic) Print location and recommend that TODO should be implemented
+
+		List<Comment> allComments = new ArrayList<>();
+
+		for (CompilationUnit cu : sourceRoot.getCompilationUnits()) {
+			allComments.addAll(cu.getAllContainedComments());
+		}
+		// System.out.println(allComments.toString());
 
 
 
