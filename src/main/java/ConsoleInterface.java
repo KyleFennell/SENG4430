@@ -56,9 +56,9 @@ public class ConsoleInterface{
     /**
      * Register all Modules available to the ModuleManager
      */
-    private void registerModules(){
-        ModuleInterface lengthOfCode = new LengthOfCode();
-        ModuleManager.registerModule(lengthOfCode);
+    private void registerModules() {
+        //TODO: Add all modules here
+        ModuleManager.registerModule(new LengthOfCode());
     }
 
     /**
