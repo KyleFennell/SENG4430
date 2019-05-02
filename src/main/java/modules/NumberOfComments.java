@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class NumberOfComments implements ModuleInterface {
@@ -118,6 +119,27 @@ public class NumberOfComments implements ModuleInterface {
 	 */
 	private double copyrightSubmetric() {
 
+		Predicate<Comment> isJavadoc = Comment::isJavadocComment;
+		Predicate<Comment> isBlock = Comment::isBlockComment;
+		List<FileCommentReport> fileCommentReports = new ArrayList<>();
+
+		for (CompilationUnit unit : sourceRoot.getCompilationUnits()) {
+			List<CommentReportEntry> comments = unit.getOrphanComments()
+														.stream()
+														.filter(isJavadoc.or(isBlock))
+														.map(p -> new CommentReportEntry(p.getClass().getSimpleName(),
+																						 p.getContent(),
+																						 p.getRange().get().begin.line,
+																						 !p.getCommentedNode().isPresent()))
+														.collect(Collectors.toList());
+			if (!comments.isEmpty())
+				fileCommentReports.add(new FileCommentReport(unit.getPrimaryTypeName().get(),
+															 unit.getPrimaryType().get().isClassOrInterfaceDeclaration(),
+															 unit.getPrimaryType().get().getRange().get().begin.line,
+															 comments));
+		}
+
+		fileCommentReports.forEach(System.out::println);
 
 		return 0.0;
 	}
