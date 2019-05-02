@@ -10,7 +10,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class NumberOfComments implements ModuleInterface {
 
@@ -37,6 +36,11 @@ public class NumberOfComments implements ModuleInterface {
 					   "Each analysis will factor in several different ‘what if’ conditions and edge cases to " +
 					   "return a single optimal value";
 	}
+	@Override
+	public String printMetrics() {
+		return null;
+	}
+
 
 	// ! OVERLOADED FOR DRIVER CLASS
 	public String[] executeModule() {
@@ -54,16 +58,88 @@ public class NumberOfComments implements ModuleInterface {
 		}
 
 		// Begin analysing:
-		todoSubmetric();
-
+		// todoSubmetric();
+		copyrightSubmetric();
 
 		return new String[0];
 	}
 
+
+	/**
+	 * The following rationale is for projects developed within a collaborate environment; which is enabled by default.
+	 * For independent projects, TO-DO comments will be treated as an inline or block comment. Therefore, this
+	 * sub-module will always return the most optimal value when the project has been marked as independent.
+	 * However, a warning will be issued stating there exists a TO-DO and it should be implemented or removed.
+	 *
+	 * @return the optimal value of comments that fall under the sub-class of TO-DO
+	 */
+	private double todoSubmetric() {
+
+		List<String> criteria = new ArrayList<>(Arrays.asList("todo", "to-do"));
+
+		int todoFound = 0;
+		int totalComments = 0;
+
+		for (CompilationUnit unit : sourceRoot.getCompilationUnits()) {
+			for (Comment com : unit.getAllContainedComments()) {
+				if (criteria.parallelStream().anyMatch(com.getContent().toLowerCase()::contains)) {
+					System.out.println(unit.getPrimaryTypeName().get() + "::"
+											   + com.getRange().get().begin.line + " = \""
+											   + com.getContent() + "\"");
+					todoFound++;
+				}
+			}
+			totalComments += unit.getAllContainedComments().size();
+		}
+
+		System.out.println(System.lineSeparator() + "Summary: ");
+		System.out.println("\tComments found: " +  totalComments + System.lineSeparator() +"\tTODO found: " + todoFound);
+
+		if (totalComments == 0) {
+			return 1;
+		} else if (IS_INDEPENDENT && todoFound > 0) {
+			System.out.println("Recommendation: " + System.lineSeparator()
+									   + "\tIndependently developed code will receive the optimal value for this sub metric, however, it is recommended that the above TODOs be implemented or removed.");
+		}
+		return 1 / ((Math.pow(todoFound, Math.E) / totalComments) + 1);
+
+
+
+	}
+
+
+	/**
+	 * At no point in time can a class have more than a single copyright header.
+	 * 		If a class does not contain a copyright header, then this is NOT considered erroneous.
+	 * 		However, it WILL BE considered erroneous if “Compliance of Conformance” has the “consistency” flag enabled.
+	 * 			This will also directly affect the final optimal value of that sub-module as well.
+	 *
+	 * @return
+	 */
+	private double copyrightSubmetric() {
+
+
+		return 0.0;
+	}
+
+
+
+
+	private double TrivialAndUnnecessarySubmetric() {
+		return 0.0;
+	}
+	private double SurroundedBySubmetric() {
+		return 0.0;
+	}
+	private double ComplianceOfConformanceSubmetric() {
+		return 0.0;
+	}
+
+
+
 	/*
-		The methods here were developed with the idea of being able to analyse a file directly OR an entire root.
-		At this point in time, they are redundant but may add that extra function if decided to be implemented but I
-		will still override here just to show it works.
+	These methods were developed with the idea of being able to analyse a file directly OR an entire root.
+	At this point in time, they are redundant but I may develop further.
 	 */
 	private static boolean init() {
 		return init(ANALYSIS_ROOT);
@@ -92,66 +168,67 @@ public class NumberOfComments implements ModuleInterface {
 		classesAndLocation.forEach((k, v) -> System.out.println("\t * " + v + System.lineSeparator() + "\t\t ^ " + k));
 	}
 
-	/**
-	 * The following rationale is for projects developed within a collaborate environment; which is enabled by default.
-	 * For independent projects, TO-DO comments will be treated as an inline or block comment. Therefore, this
-	 * sub-module will always return the most optimal value when the project has been marked as independent.
-	 * However, a warning will be issued stating there exists a TO-DO and it should be implemented or removed.
+
+
+	private static class FileCommentReport {
+		private String nodeName;
+		private boolean isClassOrInterface;
+		private int lineDeclarationOn;
+		private List<CommentReportEntry> commentList;
+
+		FileCommentReport(String nodeName, boolean isClassOrInterface, int lineDeclarationOn, List<CommentReportEntry> commentList) {
+			this.nodeName = nodeName;
+			this.isClassOrInterface = isClassOrInterface;
+			this.lineDeclarationOn = lineDeclarationOn;
+			this.commentList = commentList;
+		}
+		@Override
+		public String toString() {
+			return nodeName +
+						   "{" +
+						   System.lineSeparator() +
+						   "isClassOrInterface=" + isClassOrInterface +
+						   ", lineDeclarationOn=" + lineDeclarationOn +
+						   ", commentList=" + commentList +
+						   System.lineSeparator() +
+						   '}';
+		}
+	}
+
+
+	/*
+	 * Book			: 	JavaParser: Visited
+	 * Authors		: 	Nicholas Smith, Danny van Bruggen, and Federico Tomassetti
+	 * Created		: 	May 2018
+	 * Modified		: 	April 2019
+	 * Link			:	https://github.com/javaparser/javaparser-visited
 	 *
-	 * @return the optimal value of comments that fall under the sub-class of TO-DO
+	 * @return
 	 */
-	private double todoSubmetric() {
+	private static class CommentReportEntry {
+		private String type;
+		private String text;
+		private int lineNumber;
+		private boolean isOrphan;
 
-		List<String> criteria = new ArrayList<>(Arrays.asList("todo", "to-do"));
-
-		int todoFound = 0;
-		int totalComments = 0;
-
-		for (CompilationUnit unit : sourceRoot.getCompilationUnits()) {
-			for (Comment com : unit.getAllContainedComments()) {
-				if (criteria.parallelStream().anyMatch(com.getContent().toLowerCase()::contains)) {
-
-					System.out.println(unit.getPrimaryTypeName().get() + "::"
-											   + com.getRange().get().begin.line + " = \""
-											   + com.getContent() + "\"");
-					todoFound++;
-				}
-			}
-			totalComments += unit.getAllContainedComments().size();
+		CommentReportEntry(String type, String text, int lineNumber, boolean isOrphan) {
+			this.type = type;
+			this.text = text;
+			this.lineNumber = lineNumber;
+			this.isOrphan = isOrphan;
 		}
 
-		System.out.println(System.lineSeparator() + "Summary: ");
-		System.out.println("\tComments found: " +  totalComments + System.lineSeparator() +"\tTODO found: " + todoFound);
-
-		if (IS_INDEPENDENT && todoFound > 0) {
-			System.out.println("Recommendation: " + System.lineSeparator() + "\tIndependently developed code will receive the optimal value for this sub metric, however, it is recommended that the above TODOs be implemented or removed.");
-			return 1;
+		@Override
+		public String toString() {
+			return System.lineSeparator() +
+						   "\t" +
+						   "CommentReportEntry{" +
+						   "type='" + type + '\'' +
+						   ", lineNumber=" + lineNumber +
+						   ", isOrphan=" + isOrphan +
+						   '}';
 		}
-
-		if (totalComments == 0)
-			return 0;
-
-		return 1 / ( (Math.pow(todoFound, Math.E)/totalComments) + 1 );
 	}
 
-
-
-	private double copyrightSubmetric() {
-		return 0.0;
-	}
-	private double TrivialAndUnnecessarySubmetric() {
-		return 0.0;
-	}
-	private double SurroundedBySubmetric() {
-		return 0.0;
-	}
-	private double ComplianceOfConformanceSubmetric() {
-		return 0.0;
-	}
-
-	@Override
-	public String printMetrics() {
-		return null;
-	}
 
 }
