@@ -66,6 +66,10 @@ public class ModuleManager {
     public static String listLoadedModules(){
         String list = "";
 
+        if (m_loadedModules.size() == 0) {
+            return "No Modules Loaded";
+        }
+
         for (ModuleInterface m : m_loadedModules){
             list += m.getName() + ", ";
         }

@@ -155,12 +155,13 @@ public class ConsoleInterface{
             @Override
             public String execute(String[] args) {
                 Logger.debug("Executing List command");
-                if (args.length > 2) {
-                    Logger.error("Command 'List' - Expects 1-2 argument.");
+                if (args.length < 1 || args.length > 2) {
+                    Logger.error("Command 'List' - Expects 1-2 argument. Received " + args.length);
                     return null;
                 }
+
                 switch(args[0].toLowerCase()) {
-                    case "module":
+                    case "modules":
                         System.out.println(ModuleManager.listModules());
                         return ModuleManager.listModules();
                     case "commands":
@@ -259,6 +260,12 @@ public class ConsoleInterface{
                 }
 
                 //TODO: Whatever is to be done with output
+                for (String[] result : allResults) {
+                    for (String element : result) {
+                        System.out.print(element + " ");
+                    }
+                    System.out.println();
+                }
 
                 return "";
             }
