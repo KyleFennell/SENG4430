@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class NumberOfComments implements ModuleInterface {
@@ -19,6 +18,7 @@ public class NumberOfComments implements ModuleInterface {
 	private static Map<Path, String> classesAndLocation;
 
 	private static boolean IS_INDEPENDENT = false;
+	private static boolean CONFORMENCE = true;
 
 
 	@Override
@@ -111,37 +111,75 @@ public class NumberOfComments implements ModuleInterface {
 
 	/**
 	 * At no point in time can a class have more than a single copyright header.
-	 * 		If a class does not contain a copyright header, then this is NOT considered erroneous.
+	 * 		If a class does not contain a copyright header, then this is neither negative nor positive.
+	 * 			i.e. the optimal value for that file will be 0.5
 	 * 		However, it WILL BE considered erroneous if “Compliance of Conformance” has the “consistency” flag enabled.
-	 * 			This will also directly affect the final optimal value of that sub-module as well.
+	 * 			This will also directly affect the optimal value of that sub-module as well.
 	 *
 	 * @return
 	 */
 	private double copyrightSubmetric() {
 
-		Predicate<Comment> isJavadoc = Comment::isJavadocComment;
-		Predicate<Comment> isBlock = Comment::isBlockComment;
+		int totalFiles = 0;
+		double sumOfFileScores = 0;
+		List<String> criteria = new ArrayList<>(Arrays.asList("copyright", "copy-right", "copy right"));
 		List<FileCommentReport> fileCommentReports = new ArrayList<>();
 
+
 		for (CompilationUnit unit : sourceRoot.getCompilationUnits()) {
+			totalFiles++;
+			int classDecLine = unit.getPrimaryType().get().getRange().get().begin.line;
 			List<CommentReportEntry> comments = unit.getOrphanComments()
 														.stream()
-														.filter(isJavadoc.or(isBlock))
+														.filter(p -> p.getRange().get().begin.line < classDecLine)
 														.map(p -> new CommentReportEntry(p.getClass().getSimpleName(),
 																						 p.getContent(),
 																						 p.getRange().get().begin.line,
 																						 !p.getCommentedNode().isPresent()))
 														.collect(Collectors.toList());
-			if (!comments.isEmpty())
-				fileCommentReports.add(new FileCommentReport(unit.getPrimaryTypeName().get(),
-															 unit.getPrimaryType().get().isClassOrInterfaceDeclaration(),
-															 unit.getPrimaryType().get().getRange().get().begin.line,
-															 comments));
+
+			fileCommentReports.add(new FileCommentReport(unit.getPrimaryTypeName().get(),
+														 unit.getPrimaryType().get().isClassOrInterfaceDeclaration(),
+														 classDecLine,
+														 comments));
 		}
 
-		fileCommentReports.forEach(System.out::println);
 
-		return 0.0;
+		for (FileCommentReport file : fileCommentReports) {
+			// TODO: do I include the conformance here or separate from this sub-module?
+			// double fileScore = CONFORMENCE ? 0.5 : 0;
+			double fileScore = 0;
+			int commentsChecked = 0;
+			int copyrightsFound = 0;
+
+			System.out.println(file.nodeName);
+			for (CommentReportEntry comment : file.commentList) {
+				String commentVerdict = "";
+				commentsChecked++;
+
+				if (criteria.parallelStream().anyMatch(comment.text.toLowerCase()::contains)) {
+					copyrightsFound++;
+					if (comment.type.equals("BlockComment") && (copyrightsFound == 1 && commentsChecked == 1)) {
+						commentVerdict = " - CONFORMS";
+						fileScore = 1;
+					} else {
+						commentVerdict = " - VALID but not first comment.";
+					}
+				}
+				System.out.println(comment.toString() + commentVerdict);
+			}
+
+			if (copyrightsFound > 1) {
+				System.out.println("Multiple copyrights found. Optimal value -> 0.");
+				fileScore = 0;
+			}
+
+			sumOfFileScores += fileScore;
+			System.out.println("Optimal Value for file: " + fileScore + System.lineSeparator());
+		}
+
+		System.out.println("Final Value: " + sumOfFileScores / fileCommentReports.size());
+		return sumOfFileScores / fileCommentReports.size();
 	}
 
 
@@ -195,8 +233,10 @@ public class NumberOfComments implements ModuleInterface {
 	private static class FileCommentReport {
 		private String nodeName;
 		private boolean isClassOrInterface;
+		private boolean isCopyrightValid;
 		private int lineDeclarationOn;
 		private List<CommentReportEntry> commentList;
+
 
 		FileCommentReport(String nodeName, boolean isClassOrInterface, int lineDeclarationOn, List<CommentReportEntry> commentList) {
 			this.nodeName = nodeName;
@@ -225,7 +265,6 @@ public class NumberOfComments implements ModuleInterface {
 	 * Modified		: 	April 2019
 	 * Link			:	https://github.com/javaparser/javaparser-visited
 	 *
-	 * @return
 	 */
 	private static class CommentReportEntry {
 		private String type;
@@ -242,13 +281,7 @@ public class NumberOfComments implements ModuleInterface {
 
 		@Override
 		public String toString() {
-			return System.lineSeparator() +
-						   "\t" +
-						   "CommentReportEntry{" +
-						   "type='" + type + '\'' +
-						   ", lineNumber=" + lineNumber +
-						   ", isOrphan=" + isOrphan +
-						   '}';
+			return "\tLine:" + lineNumber + " " + type;
 		}
 	}
 
