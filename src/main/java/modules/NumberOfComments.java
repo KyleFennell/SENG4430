@@ -50,17 +50,17 @@ public class NumberOfComments implements ModuleInterface {
 	@Override
 	public String[] executeModule(SourceRoot sourceRoot) {
 
-		if (init()) {
-			System.out.println("Files being Analysed: ");
-			printFilesAndLocation();
-			System.out.println(System.lineSeparator());
-		} else {
+		if (!init()) {
 			throw new IllegalStateException("Failed to initialise correctly. Wrong or empty folder.");
+
 		}
 
+		System.out.println("Files being Analysed: ");
+		printFilesAndLocation();
+
 		// Begin analysing:
-		// todoSubmetric();
-		copyrightSubmetric();
+		System.out.println(todoSubmetric());
+		System.out.println(copyrightSubmetric());
 
 		return new String[0];
 	}
@@ -75,37 +75,21 @@ public class NumberOfComments implements ModuleInterface {
 	 * @return the optimal value of comments that fall under the sub-class of TO-DO
 	 */
 	private double todoSubmetric() {
-
-		List<String> criteria = new ArrayList<>(Arrays.asList("todo", "to-do"));
-
 		int todoFound = 0;
 		int totalComments = 0;
+		List<String> criteria = new ArrayList<>(Arrays.asList("todo", "to-do", "fixme"));
 
 		for (CompilationUnit unit : sourceRoot.getCompilationUnits()) {
 			for (Comment com : unit.getAllContainedComments()) {
-				if (criteria.parallelStream().anyMatch(com.getContent().toLowerCase()::contains)) {
-					System.out.println(unit.getPrimaryTypeName().get() + "::"
-											   + com.getRange().get().begin.line + " = \""
-											   + com.getContent() + "\"");
+				if (criteria.parallelStream().anyMatch(com.getContent().toLowerCase()::contains))
 					todoFound++;
-				}
 			}
 			totalComments += unit.getAllContainedComments().size();
 		}
 
-		System.out.println(System.lineSeparator() + "Summary: ");
-		System.out.println("\tComments found: " +  totalComments + System.lineSeparator() +"\tTODO found: " + todoFound);
-
-		if (totalComments == 0) {
+		if (totalComments == 0)
 			return 1;
-		} else if (IS_INDEPENDENT && todoFound > 0) {
-			System.out.println("Recommendation: " + System.lineSeparator()
-									   + "\tIndependently developed code will receive the optimal value for this sub metric, however, it is recommended that the above TODOs be implemented or removed.");
-		}
 		return 1 / ((Math.pow(todoFound, Math.E) / totalComments) + 1);
-
-
-
 	}
 
 
@@ -114,20 +98,19 @@ public class NumberOfComments implements ModuleInterface {
 	 * 		If a class does not contain a copyright header, then this is neither negative nor positive.
 	 * 			i.e. the optimal value for that file will be 0.5
 	 * 		However, it WILL BE considered erroneous if “Compliance of Conformance” has the “consistency” flag enabled.
-	 * 			This will also directly affect the optimal value of that sub-module as well.
 	 *
-	 * @return
+	 * NOTE: The implementation only checks orphaned comments. i.e. comments that do not directly belong to a node
+	 * within the AST. Therefore, any copyright comments in function headers, inline, etc. will not be counted.
+	 * 		The reasoning behind this is to reduce false-positives.
+	 *
+	 * @return the optimal value for comments that fall under copyright headers
 	 */
 	private double copyrightSubmetric() {
-
-		int totalFiles = 0;
 		double sumOfFileScores = 0;
-		List<String> criteria = new ArrayList<>(Arrays.asList("copyright", "copy-right", "copy right"));
 		List<FileCommentReport> fileCommentReports = new ArrayList<>();
-
+		List<String> criteria = new ArrayList<>(Arrays.asList("copyright", "copy-right", "copy right"));
 
 		for (CompilationUnit unit : sourceRoot.getCompilationUnits()) {
-			totalFiles++;
 			int classDecLine = unit.getPrimaryType().get().getRange().get().begin.line;
 			List<CommentReportEntry> comments = unit.getOrphanComments()
 														.stream()
@@ -144,41 +127,25 @@ public class NumberOfComments implements ModuleInterface {
 														 comments));
 		}
 
-
 		for (FileCommentReport file : fileCommentReports) {
-			// TODO: do I include the conformance here or separate from this sub-module?
 			// double fileScore = CONFORMENCE ? 0.5 : 0;
 			double fileScore = 0;
 			int commentsChecked = 0;
 			int copyrightsFound = 0;
 
-			System.out.println(file.nodeName);
 			for (CommentReportEntry comment : file.commentList) {
-				String commentVerdict = "";
 				commentsChecked++;
-
 				if (criteria.parallelStream().anyMatch(comment.text.toLowerCase()::contains)) {
 					copyrightsFound++;
 					if (comment.type.equals("BlockComment") && (copyrightsFound == 1 && commentsChecked == 1)) {
-						commentVerdict = " - CONFORMS";
 						fileScore = 1;
-					} else {
-						commentVerdict = " - VALID but not first comment.";
 					}
 				}
-				System.out.println(comment.toString() + commentVerdict);
 			}
-
-			if (copyrightsFound > 1) {
-				System.out.println("Multiple copyrights found. Optimal value -> 0.");
+			if (copyrightsFound > 1)
 				fileScore = 0;
-			}
-
 			sumOfFileScores += fileScore;
-			System.out.println("Optimal Value for file: " + fileScore + System.lineSeparator());
 		}
-
-		System.out.println("Final Value: " + sumOfFileScores / fileCommentReports.size());
 		return sumOfFileScores / fileCommentReports.size();
 	}
 
