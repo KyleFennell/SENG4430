@@ -3,6 +3,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
 import modules.LengthOfCode;
 import modules.ModuleInterface;
+import utils.Logger;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -287,7 +288,7 @@ public class ConsoleInterface{
         String[] arr2 = in1.length > in2.length? in1 : in2;
         for (int i = 0; i < arr1.length; i++){
             if (!arr1[i].equals(arr2[i])) {
-//				Logger.debug(arr1[i] + " != " + arr2[i]);
+//				utils.Logger.debug(arr1[i] + " != " + arr2[i]);
                 return -1;
             }
         }
