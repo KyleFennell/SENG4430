@@ -6,6 +6,8 @@ import modules.ModuleInterface;
 import utils.Logger;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -189,7 +191,13 @@ public class ConsoleInterface{
                     return null;
                 }
 
-                sourceRoot = new SourceRoot(Paths.get(args[0]));
+                Path sourcePath = Paths.get(args[0]);
+                if (!Files.exists(sourcePath)) {
+                    Logger.error("Command 'Load' - Path entered is invalid.");
+                    return null;
+                }
+
+                sourceRoot = new SourceRoot(sourcePath);
 
                 return "";
             }
