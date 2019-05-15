@@ -1,6 +1,7 @@
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
+import modules.FogIndex;
 import modules.LengthOfCode;
 import modules.ModuleInterface;
 
@@ -56,8 +57,8 @@ public class ConsoleInterface{
      * Register all Modules available to the ModuleManager
      */
     private void registerModules(){
-        ModuleInterface lengthOfCode = new LengthOfCode();
-        ModuleManager.registerModule(lengthOfCode);
+        ModuleManager.registerModule(new LengthOfCode());
+        ModuleManager.registerModule(new FogIndex());
     }
 
     /**
@@ -122,6 +123,7 @@ public class ConsoleInterface{
                 return null;
             }
         });
+
 
         m_commands.add(new Command(
                 "help",
