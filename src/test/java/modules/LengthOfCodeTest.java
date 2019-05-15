@@ -1,9 +1,8 @@
 package modules;
 
 import com.github.javaparser.utils.SourceRoot;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
+
 import static org.junit.Assert.*;
 
 import java.nio.file.Paths;
@@ -18,18 +17,22 @@ import java.nio.file.Paths;
 public class LengthOfCodeTest {
 
     private LengthOfCode loc;
-    private SourceRoot sourceRoot;
+    private static SourceRoot sourceRoot;
+    private LengthOfCode loc2;
+    private static SourceRoot sourceRoot2;
 
-    @Before
-    public void setUp() throws Exception {
-        loc = new LengthOfCode();
+    @BeforeClass
+    public static void setUpClass() throws Exception {
         sourceRoot = new SourceRoot(Paths.get("C:\\dev\\java\\Java-Static-Analyzer\\src\\main\\java"));
-        //TODO: sourceRoot = new SourceRoot(Paths.get("src\\main\\java"));
         sourceRoot.tryToParse();
+        sourceRoot2 = new SourceRoot(Paths.get("src\\main\\java"));
+        sourceRoot2.tryToParse();
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @Before
+    public void setUpMethod() {
+        loc = new LengthOfCode();
+        loc2 = new LengthOfCode();
     }
 
     @Test
@@ -41,12 +44,26 @@ public class LengthOfCodeTest {
     public void executeModule() {
         String[] results = loc.executeModule(sourceRoot);
         String[] expected = new String[] {
-                "LengthOfCode",
-                "LineCount:1089",
-                "FilesRead:19",
-                "SmallestSize:9",
-                "MedianSize:51",
-                "LargestSize:140"
+            "LengthOfCode",
+            "LineCount:1089",
+            "FilesRead:19",
+            "SmallestSize:9",
+            "MedianSize:51",
+            "LargestSize:140"
+        };
+        assertArrayEquals(expected, results);
+    }
+
+    @Test
+    public void executeModule2() {
+        String[] results = loc2.executeModule(sourceRoot2);
+        String[] expected = new String[] {
+            "LengthOfCode",
+            "LineCount:895",
+            "FilesRead:9",
+            "SmallestSize:7",
+            "MedianSize:82",
+            "LargestSize:343"
         };
         assertArrayEquals(expected, results);
     }
@@ -60,11 +77,17 @@ public class LengthOfCodeTest {
         assertEquals(description, loc.getDescription());
     }
 
-    //TODO: New Test Data
     @Test
     public void printMetrics() {
         loc.executeModule(sourceRoot);
         String expected = "";
         assertEquals(expected, loc.printMetrics());
+    }
+
+    @Test
+    public void printMetrics2() {
+        loc2.executeModule(sourceRoot2);
+        String expected = "C:\\dev\\uni\\SENG4430\\src\\main\\java\\ConsoleInterface.java: 343 lines. [File larger than 200, may need reviewing]\r\n";
+        assertEquals(expected, loc2.printMetrics());
     }
 }

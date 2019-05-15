@@ -6,6 +6,7 @@ import java.util.Collections;
 import com.github.javaparser.utils.SourceRoot;
 import com.github.javaparser.ast.CompilationUnit;
 
+import modules.helpers.LengthHelper;
 import utils.Logger;
 
 /**
@@ -31,7 +32,8 @@ public class LengthOfCode implements ModuleInterface {
 
     /**
      * This calculates a number of results for the project:
-     * TotalLineCount, NumberOfFiles, SmallestFile, MedianFile, LargestFile.
+     * Total Line Count, Number Of Files, Smallest File Size,
+     * Median File Size, Largest File Size.
      *
      * @param sourceRoot AST of Source Files
      * @return           the summary results of the module being run
@@ -55,29 +57,22 @@ public class LengthOfCode implements ModuleInterface {
             fileCounts.add(cuLineCount);
 
             if (cuLineCount > LOW_LENGTH) {
-                String limit = Integer.toString(LOW_LENGTH);
-                String messageExtension = "may need reviewing]";
-                if (cuLineCount > MED_LENGTH) {
-                    limit = Integer.toString(MED_LENGTH);
-                    messageExtension = "should be reviewed]";
-                }
-                if (cuLineCount > HIGH_LENGTH) {
-                    limit = Integer.toString(HIGH_LENGTH);
-                    messageExtension = "should be refactored]";
-                }
+                String[] limitAndMessage = LengthHelper.limitMessageExtension(cuLineCount, LOW_LENGTH, MED_LENGTH, HIGH_LENGTH);
+                String limit = limitAndMessage[0];
+                String messageExtension = limitAndMessage[1];
 
                 if (cu.getStorage().isPresent()) {
                     StringBuilder pathMessage = new StringBuilder();
                     pathMessage.append(cu.getStorage().get().getPath().toString());
-                    pathMessage.append(String.format(": %s lines. [File larger than %s, %s", cuLineCount, limit, messageExtension));
+                    pathMessage.append(String.format(": %s lines. [File larger than %s, %s]", cuLineCount, limit, messageExtension));
                     collectedFiles.add(pathMessage.toString());
                 } else {
                     Logger.error("Storage not present for given CompilationUnit.");
                 }
             }
 
-            largestSize = cuLineCount > largestSize ? cuLineCount : largestSize;
-            smallestSize = cuLineCount < smallestSize ? cuLineCount : smallestSize;
+            if (cuLineCount > largestSize) largestSize = cuLineCount;
+            if (cuLineCount < smallestSize) smallestSize = cuLineCount;
             lineCount += cuLineCount;
         }
 
@@ -86,8 +81,8 @@ public class LengthOfCode implements ModuleInterface {
         int numFilesRead = fileCounts.size();
 
         return new String[] {getName(), "LineCount:" + lineCount, "FilesRead:" + numFilesRead
-                            , "SmallestSize:" + smallestSize, "MedianSize:" + medianSize
-                            , "LargestSize:" + largestSize};
+                            ,"SmallestSize:" + smallestSize, "MedianSize:" + medianSize
+                            ,"LargestSize:" + largestSize};
     }
 
     /**
