@@ -58,6 +58,13 @@ public class ModuleManager {
 
         return list;
     }
+    /**
+     * @return list of all modules currently available in the manager
+     */
+    public static List<ModuleInterface> getModuleList(){
+
+        return m_modules;
+    }
 
     /**
      * @return lists all the active (loaded) modules that will be executed

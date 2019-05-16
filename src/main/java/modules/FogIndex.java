@@ -31,8 +31,8 @@ public class FogIndex implements ModuleInterface
     @Override
     public String[] executeModule(SourceRoot sourceRoot)
     {
-        // TODO: test whether this works
         double fogIndexValue = 0;
+        int numComplexWords = 0;
         // go through the AST looking for comments
         for (CompilationUnit cu : sourceRoot.getCompilationUnits())
         {
@@ -41,12 +41,36 @@ public class FogIndex implements ModuleInterface
             for (Comment comment : comments)
             {
                 String content = comment.getContent();
-                System.out.println(content);
+                // for each comment block
+                String[] splitIntoWords = content.split(" ");
+                // find the total number of words
+                int numberOfWords = splitIntoWords.length;
+                // check if the word is complex
+                for(String word: splitIntoWords)
+                {
+                    if(count(word) >= 3)
+                    {
+                        numComplexWords++;
+                    }
+                }
+                // find the total number of sentences (split on lines ending with a full stop or new line character
+                String[] numSentences = content.split("(\\.\n)|(\\. )|(\\.\t)|(\\n)");
+                for(String e: numSentences)
+                {
+                    // ignore sections that don't have any relevance (asterisks for formatting, single letter comments
+                    if(e.length() < 2)
+                    {
+                        continue;
+                    }
+                    System.out.println("new Sentence: " + e);
+                }
+                // do fog index calculation
+
                 fogIndexValue += count(content);
             }
         }
-
         String[] fixThisLater = {"Fog Index value is: " + fogIndexValue};
+        System.out.println(fixThisLater[0]);
         return fixThisLater;
     }
 

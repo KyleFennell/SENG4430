@@ -265,6 +265,22 @@ public class ConsoleInterface{
                 return "";
             }
         });
+
+        m_commands.add(new Command(
+                "auto load",
+                "loads all modules registered to the module manager",
+                "N\\A"){
+            @Override
+            public String execute(String[] args){
+                sourceRoot = new SourceRoot(Paths.get(SENG4430.ROOT_PATH));
+                for (ModuleInterface mi : ModuleManager.getModuleList()){
+                    if (ModuleManager.loadModule(mi.getName())) {
+                        Logger.log(" Module " + mi.getName() + " successfully loaded");
+                    }
+                }
+                return null;
+            }
+        });
     }
 
     /**
