@@ -117,10 +117,10 @@ public class FlowGraphBuilderTest {
         for(int i = 0; i < switchStrings.length; ++i){
             ParseResult<Statement> parsed = parser.parseStatement(switchStrings[i]);
             SwitchStmt stmt = (SwitchStmt)parsed.getResult().get();
-            FlowGraph result = FlowGraphBuilder.explore(stmt);
-            //assertEquals(nodes[i], result.getNodeCount());
-            //assertEquals(edges[i], result.getEdgeCount());
-            //assertEquals(inDeg[i], result.end.inDeg());
+            FlowGraph result = FlowGraphBuilder.explore(stmt, true);
+            assertEquals(nodes[i], result.getNodeCount());
+            assertEquals(inDeg[i], result.end.inDeg());
+            assertEquals(edges[i], result.getEdgeCount());
         }
     }
     
@@ -134,10 +134,10 @@ public class FlowGraphBuilderTest {
         
         JavaParser parser = new JavaParser();
         
-        int node = 3;
-        int edge = 3;
-        int startInDeg = 1;
-        int startOutDeg = 2;
+        int node = 4;
+        int edge = 4;
+        int startInDeg = 0;
+        int startOutDeg = 1;
         int endInDeg = 1;
         int endOutDeg = 0;
 
@@ -146,12 +146,12 @@ public class FlowGraphBuilderTest {
             ParseResult<Statement> parsed = parser.parseStatement(loopStrings[i]);
             Statement stmt = parsed.getResult().get();
             FlowGraph result = FlowGraphBuilder.explore(stmt);
-            //assertEquals(node, result.getNodeCount());
-            //assertEquals(edge, result.getEdgeCount());
-            //assertEquals(startInDeg, result.start.inDeg());
-            //assertEquals(startOutDeg, result.start.outDeg());
-            //assertEquals(endInDeg, result.end.inDeg());
-            //assertEquals(endOutDeg, result.end.outDeg());
+            assertEquals(node, result.getNodeCount());
+            assertEquals(edge, result.getEdgeCount());
+            assertEquals(startInDeg, result.start.inDeg());
+            assertEquals(startOutDeg, result.start.outDeg());
+            assertEquals(endInDeg, result.end.inDeg());
+            assertEquals(endOutDeg, result.end.outDeg());
         }
     }
     
@@ -165,22 +165,22 @@ public class FlowGraphBuilderTest {
         
         JavaParser parser = new JavaParser();
         
-        int node = 2;
-        int edge = 2;
-        int startInDeg = 1;
-        int startOutDeg = 2;
+        int node = 4;
+        int edge = 4;
+        int startInDeg = 0;
+        int startOutDeg = 1;
         int endInDeg = 1;
         int endOutDeg = 0;
         
         ParseResult<Statement> parsed = parser.parseStatement(doWhileString);
         Statement stmt = parsed.getResult().get();
         FlowGraph result = FlowGraphBuilder.explore(stmt);
-        //assertEquals(node, result.getNodeCount());
-        //assertEquals(edge, result.getEdgeCount());
-        //assertEquals(startInDeg, result.start.inDeg());
-        //assertEquals(startOutDeg, result.start.outDeg());
-        //assertEquals(endInDeg, result.end.inDeg());
-        //assertEquals(endOutDeg, result.end.outDeg());
+        assertEquals(node, result.getNodeCount());
+        assertEquals(edge, result.getEdgeCount());
+        assertEquals(startInDeg, result.start.inDeg());
+        assertEquals(startOutDeg, result.start.outDeg());
+        assertEquals(endInDeg, result.end.inDeg());
+        assertEquals(endOutDeg, result.end.outDeg());
     }
     
     @Test
@@ -196,6 +196,16 @@ public class FlowGraphBuilderTest {
     @Test
     public void testExploreLoopsWithLabeledBreaks(){
         //LabeledStmt
+        
+    }
+    
+    @Test
+    public void testExploreLoopsWithContinues(){
+        
+    }
+    
+    @Test
+    public void testMethod(){
         
     }
     

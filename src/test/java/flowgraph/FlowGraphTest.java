@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package flowgraph;
 
 import org.junit.jupiter.api.AfterEach;
@@ -57,12 +52,12 @@ public class FlowGraphTest {
         graph.serial_merge(new FlowGraph(true));
         assertEquals(graph.getEdgeCount(),1);
         assertEquals(graph.getNodeCount(),2);
-        graph.serial_merge(new FlowGraph(false));
-        assertEquals(graph.getEdgeCount(),1);
-        assertEquals(graph.getNodeCount(),3);
         graph.serial_merge(new FlowGraph());
         assertEquals(graph.getEdgeCount(),1);
-        assertEquals(graph.getNodeCount(),3);
+        assertEquals(graph.getNodeCount(),2);
+        graph.serial_merge(new FlowGraph(false)); //no change because there is no connection
+        assertEquals(graph.getEdgeCount(),1);
+        assertEquals(graph.getNodeCount(),2);
     }
     
 }

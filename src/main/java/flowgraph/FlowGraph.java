@@ -5,15 +5,17 @@
  */
 package flowgraph;
 
+import com.github.javaparser.utils.Pair;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 /**
  *
  * @author Nicolas Klenert
  */
 public class FlowGraph {
-    protected class FlowGraphNode{
+    protected static class FlowGraphNode{
         Collection<FlowGraphNode> to;
         Collection<FlowGraphNode> from;
         
@@ -32,14 +34,39 @@ public class FlowGraph {
             target.to.remove(this);
         }
         
-        /** The references of victim are NOT updated. Discard it after the operation!
+        /** Transfer all links from victim to the called node. 
+         * 
+         * The references of victim are NOT updated. Discard it after the operation!
          * 
          * @param victim 
          */
         protected void merge(FlowGraphNode victim){
             for(FlowGraphNode node : victim.to){
-                addTo(node);
+                this.addTo(node);
                 node.from.remove(victim);
+            }
+            for(FlowGraphNode node : victim.from){
+                node.addTo(this);
+                node.to.remove(victim);
+            }
+        }
+        
+        /** Here the node itself is the victim!
+         * 
+         * All links to node are going to go to the start of the graph
+         * and all links going outside of the node are going to be outside
+         * of the end of the graph.
+         * 
+         * @param graph 
+         */
+        protected void merge(FlowGraph graph){
+            for(FlowGraphNode node : this.from){
+                node.addTo(graph.start);
+                node.to.remove(this);
+            }
+            for(FlowGraphNode node : this.to){
+                graph.end.addTo(node);
+                node.from.remove(this);
             }
         }
         
@@ -55,41 +82,39 @@ public class FlowGraph {
     protected FlowGraphNode start;
     protected FlowGraphNode end;
     
-    private int edgeCount;
-    private int nodeCount;
-    
     public FlowGraph(){
         start = new FlowGraphNode();
         end = start;
-        nodeCount = 1;
-        edgeCount = 0;
     }
     
     public FlowGraph(boolean bool){
-        this.nodeCount = 0;
         start = new FlowGraphNode();
         end = new FlowGraphNode();
-        nodeCount = 2;
-        edgeCount = 0;
         if(bool){
             start.addTo(end);
-            edgeCount = 1;
         }
+    }
+    
+    public static Pair<FlowGraph,Pair<FlowGraphNode,FlowGraphNode>> createLoopFlowGraph(boolean doLoop){
+        FlowGraph graph = new FlowGraph(false);
+        FlowGraphNode control = new FlowGraphNode();
+        FlowGraphNode innerCode = new FlowGraphNode();
+        graph.start.addTo(doLoop ? innerCode : control);
+        control.addTo(graph.end);
+        control.addTo(innerCode);
+        innerCode.addTo(control);
+        return new Pair<>(graph,new Pair<>(control,innerCode));
     }
     
     protected FlowGraph(FlowGraphNode node){
         start = new FlowGraphNode();
         end = start;
         end.addTo(node);
-        nodeCount = 1;
-        edgeCount = 1;
     } 
     
     public FlowGraph serial_merge(FlowGraph graph){
         end.merge(graph.start);
         end = graph.end;
-        edgeCount += graph.edgeCount;
-        nodeCount += graph.nodeCount - 1;
         return this;
     }
     
@@ -106,32 +131,28 @@ public class FlowGraph {
             return parallel_append_start(graph);
         }else if(graph.end.inDeg() == 0 && graph.start != graph.end){
             //graphs end is not reachable, so delete the node
-            graph.nodeCount -= 1;
             return parallel_append_start(graph);
         }
         start.addTo(graph.start);
         graph.end.addTo(end);
-        edgeCount += graph.edgeCount + 2;
-        nodeCount += graph.nodeCount;
         return this;
     }
     
     private FlowGraph parallel_append_start(FlowGraph graph){
         start.addTo(graph.start);
-        edgeCount += graph.edgeCount + 1;
-        nodeCount += graph.nodeCount;
         return this;
     }
         
     public FlowGraph parallel_append_detour(FlowGraph graph, FlowGraph detour){
-        //if graphs end is not reachable or it already has an outlet, do not connect it!
-        if(graph.end.inDeg() == 0 || graph.end.outDeg() != 0){
+        if(graph.end.outDeg() != 0){
+            //if graphs end is already has an outlet, do not connect it!
+            return parallel_append_start(graph);
+        }else if(graph.end.inDeg() == 0 && graph.start != graph.end){
+            //graphs end is not reachable, so delete the node
             return parallel_append_start(graph);
         }
         start.addTo(graph.start);
         graph.end.addTo(detour.start);
-        edgeCount += graph.edgeCount + 2;
-        nodeCount += graph.nodeCount;
         return this;
     }
     
@@ -148,11 +169,37 @@ public class FlowGraph {
     }
     
     public int getEdgeCount(){
-        return edgeCount;
+        HashSet<FlowGraphNode> visited = new HashSet();
+        LinkedList<FlowGraphNode> queue = new LinkedList();
+        queue.add(start);
+        visited.add(start);
+        int counter = 0;
+        while(!queue.isEmpty()){
+            FlowGraphNode node = queue.pop();
+            counter += node.outDeg();
+            for(FlowGraphNode child : node.to){
+                if(visited.add(child)){
+                    queue.add(child);
+                }
+            }
+        }
+        return counter;
     }
     
     public int getNodeCount(){
-        return nodeCount;
+        HashSet<FlowGraphNode> visited = new HashSet();
+        LinkedList<FlowGraphNode> queue = new LinkedList();
+        queue.add(start);
+        visited.add(start);
+        while(!queue.isEmpty()){
+            FlowGraphNode node = queue.pop();
+            for(FlowGraphNode child : node.to){
+                if(visited.add(child)){
+                    queue.add(child);
+                }
+            }
+        }
+        return visited.size();
     }
     
 }
