@@ -2,6 +2,7 @@ import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
 import modules.LengthOfCode;
+import modules.LengthOfConditionalBlocks;
 import modules.ModuleInterface;
 import utils.Logger;
 
@@ -61,6 +62,7 @@ public class ConsoleInterface{
     private void registerModules() {
         //TODO: Add all modules here
         ModuleManager.registerModule(new LengthOfCode());
+        ModuleManager.registerModule(new LengthOfConditionalBlocks());
     }
 
     /**
