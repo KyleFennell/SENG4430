@@ -2,11 +2,16 @@ import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
 import modules.LengthOfCode;
+import modules.LengthOfConditionalBlocks;
 import modules.ModuleInterface;
+import utils.Logger;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -55,9 +60,10 @@ public class ConsoleInterface{
     /**
      * Register all Modules available to the ModuleManager
      */
-    private void registerModules(){
-        ModuleInterface lengthOfCode = new LengthOfCode();
-        ModuleManager.registerModule(lengthOfCode);
+    private void registerModules() {
+        //TODO: Add all modules here
+        ModuleManager.registerModule(new LengthOfCode());
+        ModuleManager.registerModule(new LengthOfConditionalBlocks());
     }
 
     /**
@@ -188,7 +194,13 @@ public class ConsoleInterface{
                     return null;
                 }
 
-                sourceRoot = new SourceRoot(Paths.get(args[0]));
+                Path sourcePath = Paths.get(args[0]);
+                if (!Files.exists(sourcePath)) {
+                    Logger.error("Command 'Load' - Path entered is invalid.");
+                    return null;
+                }
+
+                sourceRoot = new SourceRoot(sourcePath);
 
                 return "";
             }
@@ -259,12 +271,18 @@ public class ConsoleInterface{
                     allMetrics.add(module.printMetrics());
                 }
 
-                //TODO: Whatever is to be done with output
                 for (String[] result : allResults) {
-                    for (String element : result) {
-                        System.out.print(element + " ");
+                    System.out.println(Arrays.toString(result));
+                }
+
+                System.out.println("\nDisplay more advanced analysis? (Y/n)");
+                String choice = new Scanner(System.in).nextLine().toLowerCase();
+
+                if (choice.equals("y")) {
+                    for (String metric : allMetrics) {
+                        System.out.println("-------------------------------------------------------------");
+                        System.out.println(metric);
                     }
-                    System.out.println();
                 }
 
                 return "";
@@ -287,7 +305,7 @@ public class ConsoleInterface{
         String[] arr2 = in1.length > in2.length? in1 : in2;
         for (int i = 0; i < arr1.length; i++){
             if (!arr1[i].equals(arr2[i])) {
-//				Logger.debug(arr1[i] + " != " + arr2[i]);
+//				utils.Logger.debug(arr1[i] + " != " + arr2[i]);
                 return -1;
             }
         }

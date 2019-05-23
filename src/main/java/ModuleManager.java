@@ -1,4 +1,5 @@
 import modules.ModuleInterface;
+import utils.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,8 +88,8 @@ public class ModuleManager {
             if (m.getName().toLowerCase().equals(name.toLowerCase())){
                 return m;
             }
-            Logger.warning("No module found matching " + name);
         }
+        Logger.warning("No module found matching " + name);
         return null;
     }
 

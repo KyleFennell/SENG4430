@@ -1,11 +1,13 @@
+package utils;
+
 /**
  * Project      : Software Quality Assignment 1
- * Class name   : Logger
+ * Class name   : utils.Logger
  * Author(s)    : Kyle Fennell
  * Date         : 28/03/19
  * Purpose      : Auto formats logging messages and handles which classes of
  *      message are being shown
- * Example      : Logger.log("this is a logged message");
+ * Example      : utils.Logger.log("this is a logged message");
  */
 
 public class Logger {
@@ -54,7 +56,7 @@ public class Logger {
     }
 
     /**
-     * Logger messages take a msg which is prepended with the context and
+     * utils.Logger messages take a msg which is prepended with the context and
      * then displayed if that class of message is set to 'on'
      */
 
