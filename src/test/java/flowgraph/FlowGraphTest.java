@@ -50,14 +50,40 @@ public class FlowGraphTest {
     public void testSerialMerge(){
         FlowGraph graph = new FlowGraph();
         graph.serial_merge(new FlowGraph(true));
-        assertEquals(graph.getEdgeCount(),1);
-        assertEquals(graph.getNodeCount(),2);
+        assertEquals(1,graph.getEdgeCount());
+        assertEquals(2,graph.getNodeCount());
         graph.serial_merge(new FlowGraph());
-        assertEquals(graph.getEdgeCount(),1);
-        assertEquals(graph.getNodeCount(),2);
+        assertEquals(1,graph.getEdgeCount());
+        assertEquals(2,graph.getNodeCount());
         graph.serial_merge(new FlowGraph(false)); //no change because there is no connection
-        assertEquals(graph.getEdgeCount(),1);
-        assertEquals(graph.getNodeCount(),2);
+        assertEquals(1,graph.getEdgeCount());
+        assertEquals(2,graph.getNodeCount());
     }
     
+    @Test
+    public void testNumberOfPaths(){
+        FlowGraph empty = new FlowGraph();
+        assertEquals(1,empty.getNumberOfPaths());
+        FlowGraph easyLoop = FlowGraph.createLoopFlowGraph(false).a;
+        assertEquals(4,easyLoop.getNodeCount());
+        assertEquals(2,easyLoop.getNumberOfPaths());
+        assertEquals(3,easyLoop.getNumberOfPaths(2));
+        //test with difficult FlowGraphLoop is done with testFlowGraphFromFile
+    }
+    
+    @Test
+    public void testFlowGraphFromFile(){
+        String dir = "src/test/resources/flowgraph/";
+        String[] files = {"test1","test2","loop1","abstract1","abstract2"};
+        int[] nodes = {4,8,4,12,7};
+        int[] edges = {4,11,4,13,8};
+        int[] paths = {2,5,2,5,5};
+        
+        for(int i = 0; i < files.length; ++i){
+            FlowGraph graph = new FlowGraph(dir+files[i]+".sfg");
+            assertEquals(nodes[i],graph.getNodeCount());
+            assertEquals(edges[i],graph.getEdgeCount());
+            assertEquals(paths[i],graph.getNumberOfPaths());
+        }
+    }
 }

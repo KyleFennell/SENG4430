@@ -6,9 +6,16 @@
 package flowgraph;
 
 import com.github.javaparser.utils.Pair;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 /**
  *
@@ -110,7 +117,50 @@ public class FlowGraph {
         start = new FlowGraphNode();
         end = start;
         end.addTo(node);
-    } 
+    }
+    
+    /** Creates a Flowgraph from a file. Numbers are used for the identification of the nodes.
+     *  The start and endnode of the graph are given in the line starting with *!
+     *  All other lines give the edges of the graph as "fromNode toNode".
+     *  Lines starting with # are comments and such ignored.
+     *
+     * @param fileSrc path of file
+     */
+    public FlowGraph(String fileSrc){
+        HashMap<Integer,FlowGraphNode> map = new HashMap<>();
+        
+        java.util.function.Function<String,FlowGraphNode> getter = (String string) -> {
+            int number = Integer.parseInt(string);
+            if(map.containsKey(number)){
+                return map.get(number);
+            }
+            FlowGraphNode node = new FlowGraphNode();
+            map.put(number,node);
+            return node;
+        };
+        
+        try (Stream<String> stream = Files.lines(Paths.get(fileSrc))) {
+            stream.forEach((String line) -> {
+                if(line.startsWith("*")){
+                    //startnode and endnode
+                    String[] numbers = line.split(" ");
+                    FlowGraphNode startNode = getter.apply(numbers[1]);
+                    FlowGraphNode endNode = getter.apply(numbers[2]);
+                    start = startNode;
+                    end = endNode;
+                }else if(!line.startsWith("#")){
+                    //line is not a comment
+                    String[] numbers = line.split(" ");
+                    FlowGraphNode fromNode = getter.apply(numbers[0]);
+                    FlowGraphNode toNode = getter.apply(numbers[1]);
+                    fromNode.addTo(toNode);
+                }
+            });
+        } catch (IOException ex) {
+            //TODO: change logging
+            Logger.getLogger(FlowGraph.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     
     public FlowGraph serial_merge(FlowGraph graph){
         end.merge(graph.start);
@@ -156,6 +206,7 @@ public class FlowGraph {
         return this;
     }
     
+    @Deprecated
     protected FlowGraph insertIntoStartNode(FlowGraph graph){
         start.merge(graph.start);
         return this;
@@ -200,6 +251,66 @@ public class FlowGraph {
             }
         }
         return visited.size();
+    }
+       
+    public int getNumberOfPaths(){
+        return getNumberOfPaths(1);
+    }        
+    
+    public int getNumberOfPaths(int incrementer){
+        HashMap<FlowGraphNode, Integer> label = new HashMap<>();
+        HashSet<FlowGraphNode> visited = new HashSet<>();
+        LinkedList<FlowGraphNode> order = new LinkedList<>(); //works as a stack
+        LinkedList<FlowGraphNode> queue = new LinkedList<>();
+        //The order is important because it lets us working on an cyclic graph
+        HashMap<FlowGraphNode, FlowGraphNode> before = new HashMap<>();
+        
+        //create function for calculating if node is already in the path
+        java.util.function.BiPredicate<FlowGraphNode,FlowGraphNode> inPath = (candidate,pathEnding) -> {
+            if(candidate == end){
+                return true;
+            }
+            FlowGraphNode node = pathEnding;
+            while(node != end){
+                if(candidate == node){
+                    return true;
+                }
+                node = before.get(node);
+            }
+            return false;
+        };
+        
+        //first find all loops, give the already visited nodes a temporary label and calculate the order
+        queue.add(end);
+        while(!queue.isEmpty()){
+            FlowGraphNode node = queue.pop();
+            order.push(node);
+            for(FlowGraphNode child : node.from){
+                if(inPath.test(child,node)){
+                    //increment label of the child
+                    label.put(child, label.getOrDefault(child, 0) + incrementer);
+                }else{
+                    queue.add(child);
+                    before.put(child, node);
+                }
+            }
+        }
+        
+        //second add all labels together
+        label.put(start, 1);
+        visited.add(start);
+        while(!order.isEmpty()){
+            FlowGraphNode node = order.pop();
+            if(visited.add(node)){
+               //add all its ancestors together
+               int sum = 0;
+               for(FlowGraphNode anc : node.from){
+                   sum += label.get(anc);
+               }
+               label.put(node, sum);
+            }
+        }
+        return label.get(end);
     }
     
 }

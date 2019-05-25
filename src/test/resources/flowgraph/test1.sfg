@@ -1,0 +1,6 @@
+* 0 1
+# startnode is 0, endnode is 1
+0 2
+0 3
+2 1
+3 1

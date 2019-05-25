@@ -152,7 +152,7 @@ public class FlowGraphBuilder {
             //TODO: The source code is stupid (switch with only default case)
             
             //first thing to do is to set the breakEndPoint
-            FlowGraph graph = new FlowGraph();
+            FlowGraph graph = new FlowGraph(true);
             breakEndPoint = graph.end;
             graph = explore(entries.get(0),true).serial_merge(graph);
             breakEndPoint = null; //not necessary, but good for debugging
@@ -183,8 +183,10 @@ public class FlowGraphBuilder {
     protected static FlowGraph exploreLoopStatement(NodeWithBody stmt){
         Pair<FlowGraph,Pair<FlowGraph.FlowGraphNode,FlowGraph.FlowGraphNode>> triple = FlowGraph.createLoopFlowGraph(false);
         continueStartPoint = triple.b.a;
+        breakEndPoint = triple.a.end;
         triple.b.b.merge(explore(stmt.getBody()));
         continueStartPoint = null;
+        breakEndPoint = null;
         return triple.a;
     }
     
