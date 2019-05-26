@@ -1,33 +1,35 @@
 package modules;
 
 import com.github.javaparser.JavaToken;
-import com.github.javaparser.ParseResult;
+import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.utils.SourceRoot;
+import com.mitchtalmadge.asciidata.table.ASCIITable;
+import com.mitchtalmadge.asciidata.table.formats.ASCIITableFormat;
+import modules.helpers.Warning;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.github.javaparser.GeneratedJavaParserConstants.SINGLE_LINE_COMMENT;
+
 
 public class NumberOfComments implements ModuleInterface {
 
 	private static final String ANALYSIS_ROOT = "resources/Example2";
 	private static SourceRoot sourceRoot;
-	private static Map<Path, String> classesAndLocation;
+	private List<FileReport> results;
 
-	private static boolean IS_INDEPENDENT = false;
-	private static boolean CONFORMENCE = true;
 
 
 	@Override
 	public String getName() {
-		return "Number of Comments";
+		return "NumberOfComments";
 	}
+
 
 
 	@Override
@@ -35,40 +37,70 @@ public class NumberOfComments implements ModuleInterface {
 		return "This module has been split into the following sub-modules:\n" +
 					   "\t - To-do\n" +
 					   "\t - Copyright\n" +
-					   "\t - Trivial and Unnecessary\n" +
-					   "\t - Surrounded By\n" +
-					   "\t - Compliance of Conformance\n" +
-					   "\n" +
+					   "\t - Consecutive Line Comment Segmentation\n" +
 					   "Each analysis will factor in several different ‘what if’ conditions and edge cases to " +
 					   "return a single optimal value";
 	}
 
 
-	@Override
-	public String printMetrics() {
-		return null;
-	}
 
-
-	// ! OVERLOADED FOR DRIVER CLASS
-	String[] executeModule() {
+	public String[] executeModule() {
+		sourceRoot = new SourceRoot(Paths.get(ANALYSIS_ROOT));
 		return executeModule(sourceRoot);
 	}
+
+
 	@Override
 	public String[] executeModule(SourceRoot sourceRoot) {
-		if (!init())
-			throw new IllegalStateException("Failed to initialise correctly. Wrong or empty folder.");
-
-		System.out.println("Files being Analysed: ");
-		printFilesAndLocation();
-
-		// Begin analysing:
-		// System.out.println(todoSubmetric());
-		// System.out.println(copyrightSubmetric());
-		System.out.println(consecutiveInlineSubmetric());
-
-		return new String[0];
+		try {
+			sourceRoot.tryToParse();
+			results = new ArrayList<>();
+			for (CompilationUnit unit : sourceRoot.getCompilationUnits())
+				results.add(analyse(unit));
+			System.out.println(printMetricsTable(results));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return new String[] { printMetricsTable(results) };
 	}
+
+
+
+	@Override
+	public String printMetrics() {
+		return printMetricsTable(results);
+	}
+
+	private String printMetricsTable(List<FileReport> res) {
+		String[] headers = { "Class Name", "todo", "copyright", "l_commentSeg"};
+		String[][] data = new String[res.size()][];
+
+		for (int i = 0; i < res.size(); i++) {
+			FileReport f = res.get(i);
+			String[] row = new String[f.analyses.length+1];
+			row[0] = f.fileName;
+
+			// Collecting each file's analysis result. i.e. 'to-do, copyright, l_commentSeg'
+			for (int j = 0; j < f.analyses.length; j++) {
+				row[j+1] = String.format("%.2f", (f.analyses[j].optimalValue));
+			}
+			data[i] = row; // Add row to table
+		}
+		return ASCIITable.fromData(headers, data).withTableFormat(new ASCIITableFormat()).toString();
+	}
+
+
+
+	private FileReport analyse(CompilationUnit unit) {
+		FileReport fileReport = new FileReport(unit.getPrimaryTypeName().get(), unit.getStorage().get().getPath());
+		fileReport.analyses = new Analysis[] {
+				analyseTodo(unit),
+				analyseCopyright(unit),
+				analyseLineCommentSegmentation(unit)
+		};
+		return fileReport;
+	}
+
 
 
 	/**
@@ -77,95 +109,95 @@ public class NumberOfComments implements ModuleInterface {
 	 * sub-module will always return the most optimal value when the project has been marked as independent.
 	 * However, a warning will be issued stating there exists a TO-DO and it should be implemented or removed.
 	 *
+	 * Old Formula: analysis.optimalValue = 1 / (Math.pow(todoFound, Math.E) + 1); <- Scales too fast
+	 *
 	 * @return the optimal value of comments that fall under the sub-class of TO-DO
 	 */
-	private double todoSubmetric() {
-		int todoFound = 0;
-		int totalComments = 0;
+	private Analysis analyseTodo(CompilationUnit unit) {
+		Analysis analysis = new Analysis();
 		List<String> criteria = new ArrayList<>(Arrays.asList("todo", "to-do", "fixme"));
+		int totalComments = unit.getAllContainedComments().size();
+		int todoFound = 0;
 
-		for (CompilationUnit unit : sourceRoot.getCompilationUnits()) {
-			for (Comment com : unit.getAllContainedComments()) {
-				if (criteria.parallelStream().anyMatch(com.getContent().toLowerCase()::contains))
-					todoFound++;
+		for (Comment c : unit.getAllContainedComments()) {
+			if (criteria.stream().anyMatch(c.getContent().toLowerCase()::contains)) {
+				todoFound++;
+				analysis.warnings.add(new Warning<>("TODO found.", "Implement or remove TODO.", c.getRange().get()));
 			}
-			totalComments += unit.getAllContainedComments().size();
 		}
 
-		if (totalComments == 0)
-			return 1;
-		return 1 / ((Math.pow(todoFound, Math.E) / totalComments) + 1);
+		if (todoFound == 0) 	analysis.optimalValue = 1;
+		else 					analysis.optimalValue = 0.5 * (0.5 / todoFound);
+
+		// Scope creep
+		// analysis.addVariable("todoFound", todoFound);
+		// analysis.addVariable("totalComments", totalComments);
+
+		return analysis;
 	}
 
 
+
 	/**
-	 * At no point in time can a class have more than a single copyright header.
+	 * At no point in time can a class have more than a single copyright HEADER.
 	 * If a class does not contain a copyright header, then this is considered neither negative nor positive.
-	 * i.e. the optimal value for that file will be 0.5
-	 * However, it WILL BE considered erroneous if “Compliance of Conformance” has the “consistency” flag enabled.
-	 * <p>
-	 * NOTE: The implementation only checks orphaned comments. i.e. comments that do not directly belong to a node
-	 * within the AST. Therefore, any copyright comments in function headers, inline, etc. will not be counted.
-	 * The reasoning behind this is to reduce false-positives.
+	 * 		i.e. the optimal value for that file will be 0.5
+	 *
+	 * WARNING: This function will check all comments for Copyright information. This may result in false positives.
 	 *
 	 * @return the optimal value for comments that fall under copyright headers
 	 */
-	private double copyrightSubmetric() {
-		double sumOfFileScores = 0;
-		List<FileCommentReport> fileCommentReports = new ArrayList<>();
-		List<String> criteria = new ArrayList<>(Arrays.asList("copyright", "copy-right", "copy right"));
+	private Analysis analyseCopyright(CompilationUnit unit) {
+		List<String> criteria = new ArrayList<>(Arrays.asList("copyright", "copy-right", "copy right", "license"));
+		Analysis analysis = new Analysis();
 
-		for (CompilationUnit unit : sourceRoot.getCompilationUnits()) {
-			int classDecLine = unit.getPrimaryType().get().getRange().get().begin.line;
-			List<CommentReportEntry> comments = unit.getOrphanComments()
-														.stream()
-														.filter(p -> p.getRange().get().begin.line < classDecLine)
-														.map(p -> new CommentReportEntry(p.getClass().getSimpleName(),
-																						 p.getContent(),
-																						 p.getRange().get().begin.line,
-																						 !p.getCommentedNode().isPresent()))
-														.collect(Collectors.toList());
+		double weight = 0.5;
+		int copyrightsFound = 0;
+		int inline = 0;
+		int comments = 0;
+		boolean headerIsCorrectType = false;
 
-			fileCommentReports.add(new FileCommentReport(unit.getPrimaryTypeName().get(),
-														 unit.getPrimaryType().get().isClassOrInterfaceDeclaration(),
-														 classDecLine,
-														 comments));
-		}
-
-		// TODO gives a 0 for files that contain no copyright headers. Make a decision on whenever it should be flat 0 or 0.5
-		for (FileCommentReport file : fileCommentReports) {
-			// double fileScore = CONFORMENCE ? 0.5 : 0;
-			double fileScore = 0;
-			int commentsChecked = 0;
-			int copyrightsFound = 0;
-
-			for (CommentReportEntry comment : file.commentList) {
-				commentsChecked++;
-				if (criteria.parallelStream().anyMatch(comment.text.toLowerCase()::contains)) {
-					copyrightsFound++;
-					if (comment.type.equals("BlockComment") && (copyrightsFound == 1 && commentsChecked == 1)) {
-						fileScore = 1;
+		for (Comment c : unit.getAllContainedComments()) {
+			if (criteria.stream().anyMatch(c.getContent().toLowerCase()::contains)) {
+				if (copyrightsFound == 0 && comments == 0) {
+					if (c.isBlockComment()) {
+						headerIsCorrectType = true;
 					}
+				} else {
+					analysis.warnings.add(new Warning<>("Found block copyright comment but header already exists.", "Add to Javadoc or remove.", c.getRange().get()));
 				}
+				if (c.isLineComment()) {
+					analysis.warnings.add(new Warning<>("Copyright declared as line comment.", "Copyrights declared inline are difficult to see and/or useless within the current context. Move to file header or if authoring method, add to javaDoc with the @author annotation.", c.getRange().get()));
+					inline++;
+				}
+				copyrightsFound++;
 			}
-			if (copyrightsFound > 1)
-				fileScore = 0;
-			sumOfFileScores += fileScore;
+			comments++;
 		}
-		return sumOfFileScores / fileCommentReports.size();
+
+		// Need to think about these some more.
+		if (headerIsCorrectType) 	weight = 1;
+		if (inline != 0) 			weight *= 1 - (inline / (double) copyrightsFound);
+		if (copyrightsFound > 1) 	weight *= 1- copyrightsFound/(double)comments;
+
+		analysis.optimalValue = weight;
+		return analysis;
 	}
 
 
+
 	/**
-	 * Attempts to find inline comments (i.e comments beginning with "//") that precede one another and will update
-	 * the <code>optimalValue</code> based on how many consecutive inline comments exists per comment per file. <p>
-	 * The <code>optimalValue</code> will begin by assuming all comments are correctly formatted.
+	 * NOTE: This function is expensive as it iterates over every token in a file.
+	 *
+	 * Attempts to find inline comments (i.e comments beginning with "//") that precede one another.
+	 *
+	 * The optimal value will begin by assuming all comments are correctly formatted.
 	 * As consecutive inline comments are found, the value will update in a negative manner; i.e approaches 0. <p>
 	 * The reasoning behind this is because most text-editors allow all other comment types to be automatically folded,
-	 * where-as in-line comments are not.
-	 * 		For example: Intellij will fold inline comments, but Notepad++ does not.
-	 * This allows developers to focus solely on code after documentation is no longer needed. Similarly, will result
-	 * in faster navigation of the codebase. <p>
+	 * where-as in-line comments are not. For example: Intellij will fold inline comments, but Notepad++ does not.
+	 * This allows developers to focus solely on code and increase navigation within the codebase after documentation
+	 * is no longer needed.
+	 *
 	 * For example:
 	 * <pre>
 	 *     // Comment 1
@@ -181,181 +213,107 @@ public class NumberOfComments implements ModuleInterface {
 	 *     Comment 3
 	 *     *&#47;
 	 * </pre>
+	 * <p>
 	 *
 	 * @return the <code>optimalValue</code> between the range [0-1]
-	 */
-	private double consecutiveInlineSubmetric() {
-
-		List<Deque> summary = new ArrayList<>();
-		int totalComments = 0;
-		int totalInline = 0;
-
-		for (CompilationUnit unit : sourceRoot.getCompilationUnits()) {
-
-			totalComments += unit.getAllContainedComments().size();
-			JavaToken currentToken = unit.getTokenRange().get().getBegin();
-			Deque<JavaToken> mergeList = new LinkedList<>();
-
-			// TODO find out if there is a method of finding ONLY comment tokens. The current implementation iterates over all Java code; that is not relevant to this sub-module.
-			while (currentToken.getNextToken().isPresent()) {
-				if (currentToken.getKind() == SINGLE_LINE_COMMENT) {
-					totalInline++;
-					if (mergeList.isEmpty()) {
-						mergeList.addFirst(currentToken);
-					} else if (mergeList.peek().getRange().get().begin.column != currentToken.getRange().get().begin.column) {
-						mergeList = new LinkedList<>();
-					} else {
-						mergeList.offer(currentToken);
-					}
-				}
-				else if (!mergeList.isEmpty() && currentToken.getCategory().isWhitespace()) {
-					mergeList.offer(currentToken);
-				}
-				else if (!mergeList.isEmpty()) {
-
-					while (mergeList.peekLast() != null) {
-						if (mergeList.peekLast().getCategory().isWhitespace()) {
-							mergeList.removeLast();
-						} else {
-							if (mergeList.size() >= 3)
-								summary.add(mergeList);
-							mergeList = new LinkedList<>();
-						}
-					}
-
-				}
-				currentToken = currentToken.getNextToken().get();
-			}
-		}
-
-		int needsRefactoring = 0;
-
-		for (Deque<JavaToken> d : summary) {
-			System.out.println("--- START MERGE ---");
-			while (!d.isEmpty()) {
-				System.out.println(d.pop().getText().trim());
-				needsRefactoring++;
-			}
-			System.out.println("--- END MERGE ---" + System.lineSeparator());
-		}
-		System.out.println("Summary: ");
-		System.out.println("Total comments: " + totalComments);
-		System.out.println("Total line comments: " + totalInline);
-		System.out.println("Total lines that need refactoring: " + needsRefactoring);
-
-		// TODO figure out relevant equation
-		return 0.0;
-	}
-
-	private double TrivialAndUnnecessarySubmetric() {
-		return 0.0;
-	}
-
-
-	private double ComplianceOfConformanceSubmetric() {
-		return 0.0;
-	}
-
-
-	/*
-	These methods were developed with the idea of being able to analyse a file directly OR an entire root.
-	At this point in time, they are redundant but I may develop further.
-	*/
-	private static boolean init() {
-		return init(ANALYSIS_ROOT);
-	}
-
-	private static boolean init(String folderLocation) {
-		sourceRoot = new SourceRoot(Paths.get(folderLocation));
-		try {
-			List<ParseResult<CompilationUnit>> parseResults = sourceRoot.tryToParse();
-			return getNameLocationMap(parseResults
-											  .stream().filter(ParseResult::isSuccessful)
-											  .map(r -> r.getResult().get())
-											  .collect(Collectors.toList())
-									 );
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
-
-
-	private static boolean getNameLocationMap(List<CompilationUnit> cu) {
-		classesAndLocation = new HashMap<>();
-		for (CompilationUnit compilationUnit : cu)
-			classesAndLocation.put(compilationUnit.getStorage().get().getPath(), compilationUnit.getStorage().get().getFileName());
-		return !classesAndLocation.isEmpty();
-	}
-
-
-	private static void printFilesAndLocation() {
-		classesAndLocation.forEach((k, v) -> System.out.println("\t * " + v + ": " + k));
-	}
-
-
-	private static class FileCommentReport {
-
-		private String nodeName;
-		private boolean isClassOrInterface;
-		private boolean isCopyrightValid;
-		private int lineDeclarationOn;
-		private List<CommentReportEntry> commentList;
-
-
-		FileCommentReport(String nodeName, boolean isClassOrInterface, int lineDeclarationOn, List<CommentReportEntry> commentList) {
-			this.nodeName = nodeName;
-			this.isClassOrInterface = isClassOrInterface;
-			this.lineDeclarationOn = lineDeclarationOn;
-			this.commentList = commentList;
-		}
-
-
-		@Override
-		public String toString() {
-			return nodeName +
-						   "{" +
-						   System.lineSeparator() +
-						   "isClassOrInterface=" + isClassOrInterface +
-						   ", lineDeclarationOn=" + lineDeclarationOn +
-						   ", commentList=" + commentList +
-						   System.lineSeparator() +
-						   '}';
-		}
-
-	}
-
-
-	/*
-	 * Book			: 	JavaParser: Visited
-	 * Authors		: 	Nicholas Smith, Danny van Bruggen, and Federico Tomassetti
-	 * Created		: 	May 2018
-	 * Modified		: 	April 2019
-	 * Link			:	https://github.com/javaparser/javaparser-visited
 	 *
 	 */
-	private static class CommentReportEntry {
+	private Analysis analyseLineCommentSegmentation(CompilationUnit unit) {
 
-		private String type;
-		private String text;
-		private int lineNumber;
-		private boolean isOrphan;
+		long totalCom = unit.getAllContainedComments().stream().filter(Comment::isLineComment).count();
+		int inline = 0;
 
+		JavaToken j = unit.getTokenRange().get().getBegin();
+		Deque<JavaToken> err = new LinkedList<>();
+		Analysis fileReport = new Analysis();
 
-		CommentReportEntry(String type, String text, int lineNumber, boolean isOrphan) {
-			this.type = type;
-			this.text = text;
-			this.lineNumber = lineNumber;
-			this.isOrphan = isOrphan;
+		while (j.getNextToken().isPresent()) {
+			if (j.getKind() == SINGLE_LINE_COMMENT) {
+				if (!err.isEmpty() && isSameColumn(j, err.peek())) {
+					err = new LinkedList<>();
+				}
+				err.offer(j);
+			} else if (!err.isEmpty() && !j.getCategory().isWhitespace()) {
+				if (err.size() >= 2) {
+					inline += err.size();
+					fileReport.warnings.add(dequeToWarning(err, j.getRange().get()));
+				} else {
+					err = new LinkedList<>();
+				}
+			}
+			j = j.getNextToken().get();
 		}
 
-
-		@Override
-		public String toString() {
-			return "\tLine:" + lineNumber + " " + type;
-		}
-
+		if (fileReport.warnings.isEmpty()) 	fileReport.optimalValue = 1;
+		else 								fileReport.optimalValue = 1 - (inline / (double) totalCom);
+		return fileReport;
 	}
 
+
+
+	private boolean isSameColumn(JavaToken t1, JavaToken t2) {
+		return t1.getRange().get().begin.column != t2.getRange().get().begin.column;
+	}
+
+
+
+	private Warning<String, String, Range> dequeToWarning(Deque<JavaToken> warning, Range range) {
+		final String NL = "\n";
+		StringBuilder og = new StringBuilder();
+		StringBuilder fo = new StringBuilder();
+
+		fo.append("/*").append(NL);
+		while (!warning.isEmpty()) {
+			String commentText = warning.pop().getText().trim().replace("\t", "    ");
+			og.append(commentText).append(NL);
+			fo.append(commentText.replace("//", "")).append(NL);
+		}
+		fo.append("*/").append(NL);
+
+		return new Warning<>(og.toString(), fo.toString(), range);
+	}
+
+
+
+	private class FileReport {
+		private final String fileName;
+		private final Path fileLocation;
+		private Analysis[] analyses;
+
+		FileReport(String fileName, Path filePath) {
+			this.fileName = fileName;
+			this.fileLocation = filePath;
+		}
+	}
+
+
+	private class Analysis {
+		private List<Warning> warnings;
+		private double optimalValue;
+
+		Analysis() {
+			warnings = new ArrayList<>();
+		}
+
+		String asPercentage() {
+			return String.format("%.2f", optimalValue*100) + "%";
+		}
+
+		String printWarnings() {
+			if (!warnings.isEmpty()) {
+				String[] headers = { "Line", "Cause", "Fix" };
+				String[][] data = new String[warnings.size()][];
+
+				for (int i = 0; i < warnings.size(); i++) {
+					Warning w = warnings.get(i);
+					String[] row = { String.valueOf(w.lineOrigin.begin.line), w.cause.toString(), w.recommendedFix.toString() };
+					data[i] = row;
+				}
+
+				return ASCIITable.fromData(headers, data).withTableFormat(new ASCIITableFormat()).toString();
+			}
+			return null;
+		}
+	}
 
 }
