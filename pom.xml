@@ -76,6 +76,17 @@
             <version>5.4.2</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.mitchtalmadge/ascii-data -->
+        <dependency>
+            <groupId>com.mitchtalmadge</groupId>
+            <artifactId>ascii-data</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+
     </dependencies>
+
+
+
 
 </project>
