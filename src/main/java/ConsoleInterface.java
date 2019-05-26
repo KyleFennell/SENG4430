@@ -1,6 +1,7 @@
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
+import modules.AverageLengthOfIdentifier;
 import modules.LengthOfCode;
 import modules.LengthOfConditionalBlocks;
 import modules.ModuleInterface;
@@ -64,6 +65,7 @@ public class ConsoleInterface{
         //TODO: Add all modules here
         ModuleManager.registerModule(new LengthOfCode());
         ModuleManager.registerModule(new LengthOfConditionalBlocks());
+        ModuleManager.registerModule(new AverageLengthOfIdentifier());
     }
 
     /**
