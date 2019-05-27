@@ -23,7 +23,9 @@ public class AverageLengthOfIdentifier implements ModuleInterface
 {
 	private ArrayList<String> collectedInformation;
 	private static final String MODULE_NAME = "Average Identifier Length",
-			MODULE_DESCRIPTION = "This module calculates the average character length of all identifiers that appear in a given Java file.";
+			MODULE_DESCRIPTION = "This module calculates the average character length of all identifiers that appear in given Java file.\n" +
+								 "The purpose of this is to get a sense of how much meaning the identifiers convey.\n" +
+								 "Longer identifiers indicate more understandable code.";
 	private static final String
 			ZERO_AVERAGE_MESSAGE = "This type is ignored as there are no identifiers of this type used.\n",
 
