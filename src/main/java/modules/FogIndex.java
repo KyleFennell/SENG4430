@@ -5,17 +5,6 @@
  * Date         : 28/03/19
  * Purpose      : This module will form an estimate on how difficult the comments are to read.
  *                This will be done using the fog index for calculating reading difficulty.
- *                Possible expansions ideas:
- *                - Evaluate how each type of comment affects the fog index.
- *                      Do block comments help? or do they indicate a complex section that could be simplified?
- *                      How do Orphan comments (defined by javaparser) affect the code?
- *                      do more single line comments mean clearer code, or are they an indicator that it needs to be clarified?
- *                - accounting for acronyms as they are often few syllables but may cause confusion.
- *                - accounting for some technical jargon going to adversely affect the fog index calculation
- *                - accounting for common multiple syllable words that are easy to read register as false positive difficult words (eg: Watermelon, Helicopter)
-*                //todo: move the
- *                -//todo: potential dictionary of familiar words that can be ignored in future runs because everyone know what they are (add the to dictionary that ignores them)
- * Example      : Logger.log("this is a logged message");
  */
 package  modules;
 
@@ -27,12 +16,16 @@ import java.util.List;
 
 public class FogIndex implements ModuleInterface
 {
-
+    private String[] metrics = {""};
     @Override
     public String[] executeModule(SourceRoot sourceRoot)
     {
         double fogIndexValue = 0;
-        int numComplexWords = 0;
+        int numberOfWords = 0;
+        int numberOfSentences = 0;
+        int numberComplexWords = 0;
+        double wordsPerSentence = 0;
+        double complexWordRatio = 0;
         // go through the AST looking for comments
         for (CompilationUnit cu : sourceRoot.getCompilationUnits())
         {
@@ -43,39 +36,89 @@ public class FogIndex implements ModuleInterface
                 String content = comment.getContent();
                 // for each comment block
                 String[] splitIntoWords = content.split(" ");
-                // find the total number of words
-                int numberOfWords = splitIntoWords.length;
-                // check if the word is complex
+                // for each word
                 for(String word: splitIntoWords)
                 {
-                    if(count(word) >= 3)
+
+                    // brackets and periods are removed to ensure words don't get concatenated
+                    word = word.replaceAll("(\\(-\\)|(\\.)|/)", " ");
+                    String[] newSentence = word.split(" ");
+                    for(String newWord: newSentence)
                     {
-                        numComplexWords++;
+                        newWord = newWord.replaceAll("\\n|\\t|[!-\\-]|/-@|[{-}]|[\\[-`]", "");
+                        // remove markers extra characters from words (syllable counter only works on alphabetical characters, special characters count as a simple word)
+                        newWord = newWord.replaceAll("\"[^A-Za-z]\"", "");
+                        if (!word.equalsIgnoreCase("") && !word.equalsIgnoreCase("\n") && !word.equalsIgnoreCase("*"))
+                        {
+                            if (count(newWord) >= 3)
+                            {
+                                numberComplexWords++;
+                            }
+                            numberOfWords++;
+                        }
                     }
                 }
                 // find the total number of sentences (split on lines ending with a full stop or new line character
-                String[] numSentences = content.split("(\\.\n)|(\\. )|(\\.\t)|(\\n)");
-                for(String e: numSentences)
+                String[] sentences = content.split("(\\.\n)|(\\. )|(\\.\t)|(\\n)");
+                for(String e: sentences)
                 {
                     // ignore sections that don't have any relevance (asterisks for formatting, single letter comments
                     if(e.length() < 2)
                     {
                         continue;
                     }
-                    System.out.println("new Sentence: " + e);
+//                    System.out.println("New Sentence: " + e);
+                    numberOfSentences++;
                 }
                 // do fog index calculation
-
-                fogIndexValue += count(content);
+                complexWordRatio = ((double)numberComplexWords / (double)numberOfWords) * 100;
+                wordsPerSentence = (double) numberOfWords / numberOfSentences;
+                fogIndexValue = 0.4 * (wordsPerSentence + complexWordRatio);
             }
         }
-        String[] fixThisLater = {"Fog Index value is: " + fogIndexValue};
-        System.out.println(fixThisLater[0]);
-        return fixThisLater;
+        String results =    "Average complexity of the comments.\n" +
+                            "Fog index of comments: " + fogIndexValue + ".\n" +
+                            "There are " + numberOfWords + " words in the comments.\n" +
+                            numberComplexWords + " are complex words (made up of more than 3 syllables.\n" +
+                            "There are a total of " + numberOfSentences + "that make up the comments.\n";
+
+
+         String highIndex =  "A Fog index of over 10 indicates that the comments are complex in nature. " +
+                             "\nOne reason could be that the comments are attached to advanced control logic and a detailed explanation is required. "+
+                             "\nAnother reason could be that the method is being used to do too much at once." +
+                             "Both of these could be resolved by refactoring some logic into a sub-method.";
+         String lowIndex =  "A Fog index of 9 or lower indicates that the comments are simple in nature." +
+                            "\nThis can indicate that the method is fairly simple or coded in such a way that little explanation is required" +
+                            "\n It is also possible that the method has few comments. It is advisable to include comments to clarify complicated logic" +
+                            " or for justification of a portion of code.";
+         String noWords =   "There were no words detected in the commented sections. This could indicate a trivial class. If the class is not trivial" +
+                            "\nit may need to be reviewed.";
+
+
+        String[] fogIndexSummary = new String[2];
+        fogIndexSummary[0] = "Fog Index value is: " + fogIndexValue + "\n";
+        if(fogIndexValue >=10 && fogIndexValue < 20)
+        {
+            fogIndexSummary[1] = highIndex;
+        }
+        else if(fogIndexValue < 10 && fogIndexValue >= 0)
+        {
+            fogIndexSummary[1] = lowIndex;
+        }
+        else if(numberOfWords == 0)
+        {
+            fogIndexSummary[1] = noWords;
+        }
+        else
+        {
+            fogIndexSummary[1] = "There was a problem when running the Fog Index module, no words were counted";
+        }
+
+        metrics = fogIndexSummary;
+        return fogIndexSummary;
     }
 
-    // TODO: integrate this
-    // https://gist.github.com/jbertouch/5f19ed775b5064b7a197cb2c9017ce52
+    // Syllable counter was sourced from <https://gist.github.com/jbertouch/5f19ed775b5064b7a197cb2c9017ce52>
     private String[] addSyllableArray = { "ia", "riet", "dien", "iu", "io", "ii", "[aeiouym]bl$", "[aeiou]{3}", "^mc", "ism$",
             "[^aeiouy][^aeiouy]l$", "[^l]lien", "^coa[dglx].", "[^gq]ua[^auieo]", "dnt$" };
     private String[] subtractSyllableArray = { "cial", "tia", "cius", "cious", "giu", "ion", "iou", "sia$", ".ely$" };
@@ -127,7 +170,13 @@ public class FogIndex implements ModuleInterface
     @Override
     public String printMetrics()
     {
-        return "";
+        if(metrics[0].equals(""))
+        {
+            metrics = new String[2];
+            metrics[0] = "There was an running the Fog Index module";
+            metrics[1] = "";
+        }
+        return metrics[0].concat(metrics[1]);
     }
 
     @Override
