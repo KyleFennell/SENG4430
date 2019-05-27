@@ -3,7 +3,11 @@ package modules;
 import com.github.javaparser.JavaToken;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.Comment;
+import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.visitor.VoidVisitor;
+import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.utils.SourceRoot;
 import com.mitchtalmadge.asciidata.table.ASCIITable;
 import com.mitchtalmadge.asciidata.table.formats.ASCIITableFormat;
@@ -72,7 +76,7 @@ public class NumberOfComments implements ModuleInterface {
 	}
 
 	private String printMetricsTable(List<FileReport> res) {
-		String[] headers = { "Class Name", "todo", "copyright", "l_commentSeg"};
+		String[] headers = { "Class Name", "todo", "copyright", "l_commentSeg", "javadoc"};
 		String[][] data = new String[res.size()][];
 
 		for (int i = 0; i < res.size(); i++) {
@@ -96,11 +100,42 @@ public class NumberOfComments implements ModuleInterface {
 		fileReport.analyses = new Analysis[] {
 				analyseTodo(unit),
 				analyseCopyright(unit),
-				analyseLineCommentSegmentation(unit)
+				analyseLineCommentSegmentation(unit),
+				analyseJavadoc(unit)
 		};
 		return fileReport;
 	}
 
+
+
+	private Analysis analyseJavadoc(CompilationUnit unit) {
+		Analysis fileAnal = new Analysis();
+		Map<NameExpr, Boolean> methodDocMap = new HashMap<>();
+		VoidVisitor<Map<NameExpr, Boolean>> methodNameCollector = new MethodNameCollector();
+		methodNameCollector.visit(unit, methodDocMap);
+
+		int methodsConforming = 0;
+		for (Map.Entry<NameExpr, Boolean> entry : methodDocMap.entrySet()) {
+			NameExpr key = entry.getKey();
+			Boolean value = entry.getValue();
+			if (value) methodsConforming++;
+			else fileAnal.warnings.add(new Warning<>(
+					"No Javadoc associated with " + unit.getStorage().get().getFileName() + "::"+ key.getNameAsString(),
+					"Add Javadoc or move if whitespace exists between method.",
+					key.getRange().get()));
+		}
+
+		if (!methodDocMap.isEmpty())
+			fileAnal.optimalValue = (double) methodsConforming / methodDocMap.size();
+		return fileAnal;
+	}
+	private static class MethodNameCollector extends VoidVisitorAdapter<Map<NameExpr, Boolean>> {
+		@Override
+		public void visit(MethodDeclaration md, Map<NameExpr, Boolean> collector) {
+			super.visit(md, collector);
+			collector.put(md.getNameAsExpression(), md.getComment().filter(Comment::isJavadocComment).isPresent());
+		}
+	}
 
 
 	/**
@@ -183,7 +218,6 @@ public class NumberOfComments implements ModuleInterface {
 		analysis.optimalValue = weight;
 		return analysis;
 	}
-
 
 
 	/**
