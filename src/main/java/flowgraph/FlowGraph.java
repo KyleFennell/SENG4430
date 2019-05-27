@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package flowgraph;
 
 import com.github.javaparser.utils.Pair;
@@ -18,8 +13,11 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 /**
- *
- * @author Nicolas Klenert
+ * Project          : Software Quality Assignment 1
+ * Class name       : FlowGraph
+ * @author(s)       : Nicolas Klenert
+ * Date             : 04/05/19
+ * Purpose          : Represents the flow of code. Used to calculate different metrics.
  */
 public class FlowGraph {
     protected static class FlowGraphNode{
@@ -124,7 +122,7 @@ public class FlowGraph {
      *  All other lines give the edges of the graph as "fromNode toNode".
      *  Lines starting with # are comments and such ignored.
      *
-     * @param fileSrc path of file
+     * @param fileSrc path to file
      */
     public FlowGraph(String fileSrc){
         HashMap<Integer,FlowGraphNode> map = new HashMap<>();
@@ -219,6 +217,16 @@ public class FlowGraph {
         return this;
     }
     
+    /** Calculates the number of edges that are accessible from the start node.
+     *
+     *  The function calculates the number of edges dynamically,
+     *  that is it's calculates the number of edges each time.
+     *  If the FlowGraph is not changing and the number of edges are needed
+     *  more than once, the user is responsible of saving the number and using it,
+     *  instead of calculating the number of edges each time.
+     * 
+     * @return number of edges
+     */
     public int getEdgeCount(){
         HashSet<FlowGraphNode> visited = new HashSet();
         LinkedList<FlowGraphNode> queue = new LinkedList();
@@ -237,6 +245,16 @@ public class FlowGraph {
         return counter;
     }
     
+    /** Calculates the number of nodes that are accessible from the start node.
+     *
+     *  The function calculates the number of nodes dynamically,
+     *  that is it's calculates the number of nodes each time.
+     *  If the FlowGraph is not changing and the number of nodes are needed
+     *  more than once, the user is responsible of saving the number and using it,
+     *  instead of calculating the number of nodes each time.
+     * 
+     * @return number of nodes
+     */
     public int getNodeCount(){
         HashSet<FlowGraphNode> visited = new HashSet();
         LinkedList<FlowGraphNode> queue = new LinkedList();
@@ -251,65 +269,43 @@ public class FlowGraph {
             }
         }
         return visited.size();
-    }
-       
-    public int getNumberOfPaths(){
-        return getNumberOfPaths(1);
-    }        
+    }   
     
-    public int getNumberOfPaths(int incrementer){
+    /** Calculates the number of different path trough the graph.
+     * 
+     * @return number of different paths of the FlowGraph or -1 if there an infinite many (because it's cyclic)
+     */
+    public int getNumberOfPaths(){       
+        HashMap<FlowGraphNode, Integer> number = new HashMap<>(); //all nodes above 0
+        LinkedList<FlowGraphNode> queue = new LinkedList<>(); //all nodes with 0 and labeled
         HashMap<FlowGraphNode, Integer> label = new HashMap<>();
-        HashSet<FlowGraphNode> visited = new HashSet<>();
-        LinkedList<FlowGraphNode> order = new LinkedList<>(); //works as a stack
-        LinkedList<FlowGraphNode> queue = new LinkedList<>();
-        //The order is important because it lets us working on an cyclic graph
-        HashMap<FlowGraphNode, FlowGraphNode> before = new HashMap<>();
         
-        //create function for calculating if node is already in the path
-        java.util.function.BiPredicate<FlowGraphNode,FlowGraphNode> inPath = (candidate,pathEnding) -> {
-            if(candidate == end){
-                return true;
-            }
-            FlowGraphNode node = pathEnding;
-            while(node != end){
-                if(candidate == node){
-                    return true;
-                }
-                node = before.get(node);
-            }
-            return false;
-        };
-        
-        //first find all loops, give the already visited nodes a temporary label and calculate the order
-        queue.add(end);
-        while(!queue.isEmpty()){
+        label.put(start,1);
+        queue.add(start);
+        do{
             FlowGraphNode node = queue.pop();
-            order.push(node);
-            for(FlowGraphNode child : node.from){
-                if(inPath.test(child,node)){
-                    //increment label of the child
-                    label.put(child, label.getOrDefault(child, 0) + incrementer);
-                }else{
+            for(FlowGraphNode child : node.to){
+                int count = number.getOrDefault(child, child.inDeg()) -1;
+                if(count == 0){
                     queue.add(child);
-                    before.put(child, node);
+                    number.remove(child);
+                    //label
+                    int sum = 0;
+                    for(FlowGraphNode anc : child.from){
+                        sum += label.get(anc);
+                    }
+                    label.put(child,sum);
+                }else{
+                    number.put(child, count);
                 }
             }
+        }while(!queue.isEmpty());
+        
+        if(!number.isEmpty()){
+            //TODO: there has to be a loop in the FlowGraph! Error!
+            return -1;
         }
         
-        //second add all labels together
-        label.put(start, 1);
-        visited.add(start);
-        while(!order.isEmpty()){
-            FlowGraphNode node = order.pop();
-            if(visited.add(node)){
-               //add all its ancestors together
-               int sum = 0;
-               for(FlowGraphNode anc : node.from){
-                   sum += label.get(anc);
-               }
-               label.put(node, sum);
-            }
-        }
         return label.get(end);
     }
     

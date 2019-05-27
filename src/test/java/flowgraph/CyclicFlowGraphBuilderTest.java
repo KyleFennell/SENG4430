@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package flowgraph;
 
 import com.github.javaparser.JavaParser;
@@ -23,18 +18,17 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author Nicolas Klenert
  */
-public class FlowGraphBuilderTest {
+public class CyclicFlowGraphBuilderTest {
     
-    private final String dir = "src/test/resources/flowgraph/";
+    private final CyclicFlowGraphBuilder builder = new CyclicFlowGraphBuilder();
+    private final JavaParser parser = new JavaParser();
     
     private final String[] ifStrings = {"if(true){x=0;}",//if1.sfg
             "if(true){ x = 0;} else if(false) {x=1;}",//if2.sfg
             "if(true){ x = 0;} else { if(false) {x=1;} }",//if3.sfg
             "if(true) x=0; else if(true) x=1; else if(false) x=2; else x=3",//if4.svg
             "if(true){if(true){x=0;}if(true){x=1;}}"};//if5.svg
-
-    private final JavaParser parser = new JavaParser();
-    
+   
     @BeforeAll
     public static void setUpClass() throws Exception {
     }
@@ -51,33 +45,6 @@ public class FlowGraphBuilderTest {
     public void tearDown() throws Exception {
     }
     
-    public void compareGraphs(FlowGraph graph, FlowGraph result){
-        assertEquals(graph.getNodeCount(), result.getNodeCount());
-        assertEquals(graph.getEdgeCount(), result.getEdgeCount());
-        assertEquals(graph.start.inDeg(), result.start.inDeg());
-        assertEquals(graph.start.outDeg(), result.start.outDeg());
-        assertEquals(graph.end.inDeg(), result.end.inDeg());
-        assertEquals(graph.end.outDeg(), result.end.outDeg());
-        assertEquals(graph.getNumberOfPaths(), graph.getNumberOfPaths());
-    }
-    
-    private void compareGraphs(String src, FlowGraph result){
-        compareGraphs(new FlowGraph(dir+src+".sfg"),result);
-    }
-    
-    private void compareGraphs(String src, String code){
-        ParseResult<Statement> parsed = parser.parseStatement(code);
-        Statement stmt = parsed.getResult().get();
-        FlowGraph result = FlowGraphBuilder.explore(stmt);
-        compareGraphs(src, result);
-    }
-    
-    private void compareGraphs(String[] src, String[] code){
-        for(int i = 0; i < code.length; ++i){
-            compareGraphs(src[i],code[i]);
-        }
-    }
-
     /**
      * Test of ifStatementResolver method, of class FlowGraphBuilder.
      */
@@ -89,7 +56,7 @@ public class FlowGraphBuilderTest {
         for(int i = 0; i < ifStrings.length; ++i){
             ParseResult<Statement> parsed = parser.parseStatement(ifStrings[i]);
             IfStmt stmt = (IfStmt)parsed.getResult().get();
-            Pair<HashSet<Node>, Boolean> result = FlowGraphBuilder.ifStatementResolver(stmt);
+            Pair<HashSet<Node>, Boolean> result = builder.ifStatementResolver(stmt);
             assertEquals(sizes[i], result.a.size());
             assertEquals(bools[i], result.b);
         }
@@ -101,7 +68,7 @@ public class FlowGraphBuilderTest {
     @Test
     public void testExploreIf() {       
         String[] graphs = {"if1","if2","if3","if4","if5"};
-        compareGraphs(graphs,ifStrings);
+        TestUtils.compareGraphs(graphs,ifStrings,builder);
     }
     
     /**
@@ -121,7 +88,7 @@ public class FlowGraphBuilderTest {
             "switch(x){default: if(x) break; else x=0;}"}; //works the same as a normale if() else statement but if case skips a node
         
         final String[] graphs = {"if2","if2","switch1","switch2","switch1","if1","simple2","simple1","test2","skip1"};
-        compareGraphs(graphs,switchStrings);
+        TestUtils.compareGraphs(graphs,switchStrings,builder);
     }
     
     /**
@@ -132,10 +99,11 @@ public class FlowGraphBuilderTest {
     public void testExploreLoop() {       
         final String[] loopStrings = {"for(int i=0; i < 10; ++i){x=0;}",
             "for(int i : arr){x=0;}",
-            "while(i < 0){x=0;}"};
+            "while(i < 0){x=0;}",
+            "for(;;){for(;;){x=0;}}"};
         
-        final String[] graphSrc = {"loop1","loop1","loop1"};
-        compareGraphs(graphSrc,loopStrings);
+        final String[] graphSrc = {"loop1","loop1","loop1","loop2"};
+        TestUtils.compareGraphs(graphSrc,loopStrings,builder);
     }
     
     /**
@@ -145,7 +113,7 @@ public class FlowGraphBuilderTest {
     public void testExploreDoWhileLoop() {
         final String doWhileString = "do {x=0;} while(i < 0);";
         final String graphSrc = "do1";
-        compareGraphs(graphSrc,doWhileString);
+        TestUtils.compareGraphs(graphSrc,doWhileString,builder);
     }
     
     /**
@@ -163,7 +131,7 @@ public class FlowGraphBuilderTest {
     public void testExploreLoopsWithBreaks(){        
         final String[] string = {"for(;;){if(true) break;}"};
         final String[] graphs = {"break1"};
-        compareGraphs(graphs,string);
+        TestUtils.compareGraphs(graphs,string,builder);
     }
     
     /**

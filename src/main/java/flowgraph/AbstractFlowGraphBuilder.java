@@ -1,15 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package flowgraph;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithBody;
@@ -35,34 +28,36 @@ import java.util.ListIterator;
 import java.util.Optional;
 
 /**
- *
- * @author Nicolas Klenert
+ * Project          : Software Quality Assignment 1
+ * Class name       : AbstractFlowGraphBuilder
+ * @author(s)       : Nicolas Klenert
+ * Date             : 26/05/19
+ * Purpose          : Abstract class, which has the implementations
+ *                    AcyclicFlowGraphBuilder and CyclicFlowGraphBuilder
  */
-public class FlowGraphBuilder {
+public abstract class AbstractFlowGraphBuilder {
     
     /**
      * breakEndPoint must be set in the beginning of every loop and switch
      * and deleted in the end of every loop and switch
      */
-    private static FlowGraph.FlowGraphNode breakEndPoint;
+    protected FlowGraph.FlowGraphNode breakEndPoint;
     
     /**
      * labeledBreakEndPoints must also be set whenever there is a labled segment
      * A labeledBreakEndPoint must also be deleted when the inner Statement is not longer explored
      * 
      */
-    private static HashMap<String,FlowGraph.FlowGraphNode> labeledBreakEndPoints;
+    protected HashMap<String,FlowGraph.FlowGraphNode> labeledBreakEndPoints;
+    protected FlowGraph.FlowGraphNode returnEndPoint;
     
-    private static FlowGraph.FlowGraphNode continueStartPoint;
-    private static FlowGraph.FlowGraphNode returnEndPoint;
-    
-    /** Resolves an if-else statements so it can have mutliple then statements and one optional else statement.
+    /** Resolves an if-else statements so it can have multiple then statements and one optional else statement.
      * 
      * @param stmt if statement which should be resolved
      * @return a set of then statements and maximal one else statement.
      * The boolean indicates, if there is an else statement inside the set
      */
-    protected static Pair<HashSet<Node>,Boolean> ifStatementResolver(IfStmt stmt){
+    protected Pair<HashSet<Node>,Boolean> ifStatementResolver(IfStmt stmt){
         HashSet<Node> set;
         Optional<Statement> optionalElseStmt = stmt.getElseStmt();
         boolean elseExist = optionalElseStmt.isPresent();
@@ -89,7 +84,7 @@ public class FlowGraphBuilder {
         return new Pair<>(set, elseExist);
     }
     
-    protected static FlowGraph exploreIfStatement(IfStmt stmt){
+    protected FlowGraph exploreIfStatement(IfStmt stmt){
         //look at else-clause, there could be nested if-statements
         //bool = true if there is not a final else-clause
         Pair<HashSet<Node>,Boolean> result = ifStatementResolver(stmt);           
@@ -109,7 +104,7 @@ public class FlowGraphBuilder {
         return graph;
     }
     
-    protected static FlowGraph exploreBreakStatement(BreakStmt stmt){
+    protected FlowGraph exploreBreakStatement(BreakStmt stmt){
         String label = null;
         Optional<Expression> opt = stmt.getValue();
         if(opt.isPresent() && opt.get().isNameExpr()){
@@ -130,7 +125,7 @@ public class FlowGraphBuilder {
         }
     }
     
-    protected static FlowGraph exploreLabeledStatement(LabeledStmt stmt){
+    protected FlowGraph exploreLabeledStatement(LabeledStmt stmt){
       FlowGraph graph = new FlowGraph();
       String key = stmt.getLabel().getIdentifier();
       labeledBreakEndPoints.put(key, graph.end);
@@ -139,11 +134,9 @@ public class FlowGraphBuilder {
       return graph;
     }
     
-    protected static FlowGraph exploreContinueStatement(ContinueStmt stmt){
-        return new FlowGraph(continueStartPoint);
-    }
+    protected abstract FlowGraph exploreContinueStatement(ContinueStmt stmt);
        
-    protected static FlowGraph exploreSwitchStatement(SwitchStmt stmt){
+    protected FlowGraph exploreSwitchStatement(SwitchStmt stmt){
         NodeList<SwitchEntry> entries = stmt.getEntries();
         if(entries.isEmpty()){
             //TODO: The source code is stupid (switch without any cases)
@@ -180,25 +173,10 @@ public class FlowGraphBuilder {
         return graph;
     }
     
-    protected static FlowGraph exploreLoopStatement(NodeWithBody stmt){
-        Pair<FlowGraph,Pair<FlowGraph.FlowGraphNode,FlowGraph.FlowGraphNode>> triple = FlowGraph.createLoopFlowGraph(false);
-        continueStartPoint = triple.b.a;
-        breakEndPoint = triple.a.end;
-        triple.b.b.merge(explore(stmt.getBody()));
-        continueStartPoint = null;
-        breakEndPoint = null;
-        return triple.a;
-    }
+    protected abstract FlowGraph exploreLoopStatement(NodeWithBody stmt);
+    protected abstract FlowGraph exploreDoStatement(DoStmt stmt);
     
-    protected static FlowGraph exploreDoStatement(DoStmt stmt){
-        Pair<FlowGraph,Pair<FlowGraph.FlowGraphNode,FlowGraph.FlowGraphNode>> triple = FlowGraph.createLoopFlowGraph(true);
-        continueStartPoint = triple.b.a;
-        triple.b.b.merge(explore(stmt.getBody()));
-        continueStartPoint = null;
-        return triple.a;
-    }
-    
-    protected static FlowGraph exploreMethodDeclaration(MethodDeclaration method){
+    protected FlowGraph exploreMethodDeclaration(MethodDeclaration method){
         //look if the method decleration has a body
         Optional<BlockStmt> opt = method.getBody();
         if(opt.isEmpty()){
@@ -214,19 +192,15 @@ public class FlowGraphBuilder {
         return graph; 
     }
     
-    protected static FlowGraph exploreReturnStatement(ReturnStmt stmt){
+    protected FlowGraph exploreReturnStatement(ReturnStmt stmt){
         return new FlowGraph(returnEndPoint);
     }
     
-    public static FlowGraph explore(Node node) {
+    public FlowGraph explore(Node node){
         return explore(node,true);
     }
     
-    public static FlowGraph explore(Node node, boolean noNull) {
-        //if node can have jumps, explore it's childs
-        //if node is a jump (if,switch,ternary) build graph
-        //set to specific node while going throurgh the childs
-        //if node can't have jumps, do nothing
+    public FlowGraph explore(Node node, boolean noNull) {
         FlowGraph graph;
         if(node == null){
             graph = null;
@@ -257,12 +231,8 @@ public class FlowGraphBuilder {
         }
         return graph;
     }
-    
-    private static FlowGraph explore(Collection<? extends Node> col){
-        return explore(col,true);
-    }
         
-    private static FlowGraph explore(Collection<? extends Node> col, boolean noNull){
+    private FlowGraph explore(Collection<? extends Node> col, boolean noNull){
        LinkedList<FlowGraph> list = new LinkedList<>();
         if (col != null && !col.isEmpty()) {
             for (Node child : col) {
