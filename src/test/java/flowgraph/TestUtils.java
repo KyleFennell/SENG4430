@@ -11,13 +11,14 @@ import com.github.javaparser.ast.stmt.Statement;
 import java.util.Map;
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
  *
  * @author Nicolas Klenert
  */
 public class TestUtils {
-    private static final String DIR = "src/test/resources/flowgraph/";
+    private static final String DIR = "src/test/resources/flowgraph/graphs/";
     private static final JavaParser PARSER = new JavaParser();
     
     /**
@@ -29,13 +30,15 @@ public class TestUtils {
     );
     
     public static void compareGraphs(FlowGraph graph, FlowGraph result){
-        assertEquals(graph.getNodeCount(), result.getNodeCount());
-        assertEquals(graph.getEdgeCount(), result.getEdgeCount());
-        assertEquals(graph.start.inDeg(), result.start.inDeg());
-        assertEquals(graph.start.outDeg(), result.start.outDeg());
-        assertEquals(graph.end.inDeg(), result.end.inDeg());
-        assertEquals(graph.end.outDeg(), result.end.outDeg());
-        assertEquals(graph.getNumberOfPaths(), graph.getNumberOfPaths());
+        assertAll("comparing Graphs",
+                () -> assertEquals(graph.getNodeCount(), result.getNodeCount()),
+                () -> assertEquals(graph.getEdgeCount(), result.getEdgeCount()),
+                () -> assertEquals(graph.start.inDeg(), result.start.inDeg()),
+                () -> assertEquals(graph.start.outDeg(), result.start.outDeg()),
+                () -> assertEquals(graph.end.inDeg(), result.end.inDeg()),
+                () -> assertEquals(graph.end.outDeg(), result.end.outDeg()),
+                () -> assertEquals(graph.getNumberOfPaths(), graph.getNumberOfPaths())
+                );
     }
     
     public static void compareGraphs(String src, FlowGraph result){

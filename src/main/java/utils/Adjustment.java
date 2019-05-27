@@ -23,7 +23,7 @@ public class Adjustment{
         this.moduleIdentifier = moduleIdentifier;
         props = new ExtendedProperties();
         try{
-            InputStream input = getClass().getResourceAsStream("/config.properties");
+            InputStream input = getClass().getResourceAsStream("src/main/resources/config.properties");
             props.load(input);
         }catch(IOException exception){
             utils.Logger.warning("The configuration file could not be read!");

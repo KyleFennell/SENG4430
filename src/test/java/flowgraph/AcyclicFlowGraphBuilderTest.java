@@ -1,10 +1,8 @@
 package flowgraph;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
 
 /**
  * Project          : Software Quality Assignment 1
@@ -16,31 +14,12 @@ import org.junit.jupiter.api.Test;
 public class AcyclicFlowGraphBuilderTest {
     
     private final AcyclicFlowGraphBuilder builder = new AcyclicFlowGraphBuilder();
-    
-    public AcyclicFlowGraphBuilderTest() {
+   
+    @DisplayName("AcyclicFlowGraphBuilder behaviour")
+    @ParameterizedTest(name = "[{index}]: {1}")
+    @CsvFileSource(resources = "/flowgraph/testdata/acyclic.csv", numLinesToSkip = 1)
+    public void testAcyclicFlowGraphBuilder(String code, String file){
+       TestUtils.compareGraphs(file, code, builder);
     }
-    
-    @BeforeAll
-    public static void setUpClass() {
-    }
-    
-    @AfterAll
-    public static void tearDownClass() {
-    }
-    
-    @BeforeEach
-    public void setUp() {
-    }
-    
-    @AfterEach
-    public void tearDown() {
-    }
-
-   @Test
-   public void testLoopStatements(){
-       final String[] strings = {"for(;;){x=0;}","for(;;){for(;;){x=0;}}"};
-       final String[] files = {"path1","path2"};
-       //TODO: add tests
-   }
     
 }

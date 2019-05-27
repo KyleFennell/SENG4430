@@ -1,0 +1,48 @@
+code snippet,graph file name,display name
+if(true){x=0;},if1,Simple If
+if(true){ x = 0;} else if(false) {x=1;},if2,Simple If
+if(true){ x = 0;} else { if(false) {x=1;} },if3,Simple If
+if(true) x=0; else if(true) x=1; else if(false) x=2; else x=3,if4,Simple If
+if(true){if(true){x=0;}if(true){x=1;}},if5,Simple If
+switch(x){case 1: x=0; break; case 2: break;},if2,Simple Switch
+switch(x){case 1: x=0; break; case 2: x=1;},if2,Simple Switch
+switch(x){case 1: x=0; break; default: x=1;},switch1,Simple Switch
+switch(x){case 1: x=0; default: x=1;},switch2,Simple Switch
+switch(x){case 1: case 2: x=0; break; default: x=1;},switch1,Simple Switch
+switch(x){case 1: x=0;},if1,Simple Switch
+switch(x){default: x=0;},simple2,Default Switch
+switch(x){},simple1,Empty Switch
+switch(x){case 1: switch(y){case 1: break; case 2: break;} case 2: break; default: break;},test2,Complex Switch
+switch(x){default: if(x) break; else x=0;},skip1,Weird Switch
+for(int i=0; i < 10; ++i){x=0;},loop1,Simple For Loop
+for(int i : arr){x=0;},loop1,Simple ForEach Loop
+while(i < 0){x=0;},loop1,Simple While Loop
+for(;;){for(;;){x=0;}},loop2,Nested For Loop
+do {x=0;} while(i < 0);,do1,Simple Do Loop
+for(;;){if(true) break;},break1,Simple Break
+x = true ? 3 : 5;,,
+x = (true ? (true ? 1 : 2) : 3);,,
+"loop1:
+while(i<20){	
+	if(i==10) break loop1;
+	i++;}",,
+"loop2:
+for(int i=0;i<2;i++)
+for(int j=0;j<5;j++)
+{	
+	if(j==2) break loop2;
+}",,
+"loop1:
+while(i<20){	
+	if(i==10) continue loop1;
+	i++;}",,
+"loop2:
+for(int i=0;i<2;i++)
+for(int j=0;j<5;j++)
+{	
+	if(j==2) continue loop2;
+}",,
+"loop2:
+for(int i=0;i<2;i++){
+for(int j=0;j<5;j++){if(j==2) continue loop2;}
+if(i==3) break loop2}",,

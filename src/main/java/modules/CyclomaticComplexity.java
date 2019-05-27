@@ -1,24 +1,25 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package modules;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
+import java.util.Map;
+import utils.Adjustment;
 
 /**
  *
  * @author Nicolas Klenert
  */
-public class CyclomaticComplexity implements ModuleInterface {
+public class CyclomaticComplexity implements AdjustableModuleInterface {
+    
+    Adjustment config;
+    
     @Override
     public String getName() {
         return "Cyclometic Complexity";
     }
 
     /**
+     * @param sourceRoot the sourceRoot created by JavaParser
      * @return results of the module being run
      */
     @Override
@@ -50,5 +51,17 @@ public class CyclomaticComplexity implements ModuleInterface {
     public String printMetrics() {
         //TODO
         return null;
+    }
+
+    @Override
+    public void setAdjustments(Adjustment setting) {
+        config = setting;
+    }
+
+    @Override
+    public Map<String, String> getDefaults() {
+        return Map.of(
+                "threshold",        "7"
+        );
     }
 }

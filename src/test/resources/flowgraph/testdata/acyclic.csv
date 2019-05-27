@@ -1,0 +1,3 @@
+code snippet,graph file name
+for(;;){x=0;},simple2
+for(;;){for(;;){x=0;}},path1
