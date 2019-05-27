@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -270,12 +271,18 @@ public class ConsoleInterface{
                     allMetrics.add(module.printMetrics());
                 }
 
-                //TODO: Whatever is to be done with output
                 for (String[] result : allResults) {
-                    for (String element : result) {
-                        System.out.print(element + " ");
+                    System.out.println(Arrays.toString(result));
+                }
+
+                System.out.println("\nDisplay more advanced analysis? (Y/n)");
+                String choice = new Scanner(System.in).nextLine().toLowerCase();
+
+                if (choice.equals("y")) {
+                    for (String metric : allMetrics) {
+                        System.out.println("-------------------------------------------------------------");
+                        System.out.println(metric);
                     }
-                    System.out.println();
                 }
 
                 return "";
