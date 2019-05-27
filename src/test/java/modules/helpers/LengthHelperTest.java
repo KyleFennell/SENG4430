@@ -1,8 +1,7 @@
 package modules.helpers;
 
-import org.junit.*;
-
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import org.junit.jupiter.api.Test;
 
 /**
  * Project          : Software Quality Assignment

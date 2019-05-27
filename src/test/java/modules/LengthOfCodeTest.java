@@ -1,11 +1,12 @@
 package modules;
 
 import com.github.javaparser.utils.SourceRoot;
-import org.junit.*;
-
-import static org.junit.Assert.*;
 
 import java.nio.file.Paths;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Project          : Software Quality Assignment
@@ -20,8 +21,8 @@ public class LengthOfCodeTest {
     private static SourceRoot sourceRoot;
     private LengthOfCode loc2;
     private static SourceRoot sourceRoot2;
-
-    @BeforeClass
+    
+    @BeforeAll
     public static void setUpClass() throws Exception {
         sourceRoot = new SourceRoot(Paths.get("C:\\dev\\java\\Java-Static-Analyzer\\src\\main\\java"));
         sourceRoot.tryToParse();
@@ -29,7 +30,7 @@ public class LengthOfCodeTest {
         sourceRoot2.tryToParse();
     }
 
-    @Before
+    @BeforeEach
     public void setUpMethod() {
         loc = new LengthOfCode();
         loc2 = new LengthOfCode();
@@ -41,7 +42,7 @@ public class LengthOfCodeTest {
     }
 
     @Test
-    public void executeModule() {
+    public void ExecuteModule() {
         String[] results = loc.executeModule(sourceRoot);
         String[] expected = new String[] {
             "LengthOfCode",
