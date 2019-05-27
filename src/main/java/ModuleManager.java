@@ -3,12 +3,14 @@ import utils.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import modules.AdjustableModuleInterface;
+import utils.Adjustment;
 
 /**
  * Project          : Software Quality Assignment 1
  * Class name       : ModuleManager
  * Author(s)        : Kyle Fennell
- * Contributor(s)   : Ben Collins
+ * Contributor(s)   : Ben Collins, Nicolas Klenert
  * Date             : 28/03/19
  * Purpose          : Manages all modules in the system including getting,
  *                  registering and running them.
@@ -18,6 +20,7 @@ public class ModuleManager {
 
     private static List<ModuleInterface> m_modules = new ArrayList<>();
     private static List<ModuleInterface> m_loadedModules = new ArrayList<>();
+    private static Adjustment adjustments = new Adjustment();
 
     /**
      * Get the list of loaded modules as modules.ModuleInterface Objects
@@ -98,11 +101,18 @@ public class ModuleManager {
      * @return true if successfully added
      */
     public static boolean loadModule(String m){
-        if (m_loadedModules.contains(getModuleByName(m))){
+        ModuleInterface module = getModuleByName(m);
+        if (m_loadedModules.contains(module)){
             Logger.log("module " + m + " already loaded");
             return false;
         }
-        if (m_loadedModules.add(getModuleByName(m))){
+        if (m_loadedModules.add(module)){
+            if(module instanceof AdjustableModuleInterface){
+                //load default settings
+                adjustments.addDefaults(((AdjustableModuleInterface) module).getDefaults());
+                //give the module the adjustments
+                ((AdjustableModuleInterface) module).setAdjustments(adjustments.setModuleAccess(m));
+            }
             return true;
         }
         Logger.error("failed to add module " +  m + ". Reason unknown.");
