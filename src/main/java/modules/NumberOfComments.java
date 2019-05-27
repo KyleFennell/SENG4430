@@ -24,16 +24,13 @@ import static com.github.javaparser.GeneratedJavaParserConstants.SINGLE_LINE_COM
 public class NumberOfComments implements ModuleInterface {
 
 	private static final String ANALYSIS_ROOT = "resources/Example2";
-	private static SourceRoot sourceRoot;
 	private List<FileReport> results;
-
 
 
 	@Override
 	public String getName() {
 		return "NumberOfComments";
 	}
-
 
 
 	@Override
@@ -47,13 +44,10 @@ public class NumberOfComments implements ModuleInterface {
 	}
 
 
-
-	public String[] executeModule() {
-		sourceRoot = new SourceRoot(Paths.get(ANALYSIS_ROOT));
+	String[] executeModule() {
+		SourceRoot sourceRoot = new SourceRoot(Paths.get(ANALYSIS_ROOT));
 		return executeModule(sourceRoot);
 	}
-
-
 	@Override
 	public String[] executeModule(SourceRoot sourceRoot) {
 		try {
@@ -69,12 +63,25 @@ public class NumberOfComments implements ModuleInterface {
 	}
 
 
-
 	@Override
 	public String printMetrics() {
 		return printMetricsTable(results);
 	}
 
+
+	/**
+	 * Using the library ASCIITable, developed by Mitch Talmadge, this function will output the following in tabular form:
+	 * Each {@code Analysis} object in the parameter {@code List<FileReport>} will act a column header.
+	 * Each file that was analysed will be the row header containing each file's {@code optimalValue} between 0-1;
+	 * rounded to 2 decimal places.
+	 *
+	 * It should be noted that at this current point in time, each column header will need to be explicitly typed here.
+	 * Similarly,the {@code headers} size must match the size of each {@code res.analyses.length},
+	 * otherwise an Exception will be thrown by ASCIITable. TODO: Helper that does this automatically.
+	 *
+	 * @param res A List of FileReport objects that were analysed via the {@code analyse()} function.
+	 * @return The entire table containing analysis results as a String
+	 */
 	private String printMetricsTable(List<FileReport> res) {
 		String[] headers = { "Class Name", "todo", "copyright", "l_commentSeg", "javadoc"};
 		String[][] data = new String[res.size()][];
@@ -94,7 +101,15 @@ public class NumberOfComments implements ModuleInterface {
 	}
 
 
-
+	/**
+	 * Needed due to the current structure of implementation.
+	 * Add functions that return Analysis objects to the fileReport.analyses[] array that you wish to have associated
+	 * to each file.
+	 *
+	 * @param unit The CompilationUnit that will be analysed with each function from the current array.
+	 * @return A wrapper that contains: analysis results, optimalValue, file name, file path for each CompilationUnit
+	 * @see FileReport
+	 */
 	private FileReport analyse(CompilationUnit unit) {
 		FileReport fileReport = new FileReport(unit.getPrimaryTypeName().get(), unit.getStorage().get().getPath());
 		fileReport.analyses = new Analysis[] {
@@ -107,7 +122,13 @@ public class NumberOfComments implements ModuleInterface {
 	}
 
 
-
+	/**
+	 * Using a visitor, extract each {@code unit}'s Methods, and determines if a Javadoc exists for it. Will add
+	 * a warning to the returning @{code Analysis} if one does not exist.
+	 *
+	 * @param unit The compilationUnit that will be analysed
+	 * @return An analysis file containing the {@code unit}'s optimalValue = {@code methodsWithJavaDoc / totalMethods}
+	 */
 	private Analysis analyseJavadoc(CompilationUnit unit) {
 		Analysis fileAnal = new Analysis();
 		Map<NameExpr, Boolean> methodDocMap = new HashMap<>();
@@ -139,14 +160,16 @@ public class NumberOfComments implements ModuleInterface {
 
 
 	/**
-	 * The following rationale is for projects developed within a collaborate environment; which is enabled by default.
-	 * For independent projects, TO-DO comments will be treated as an inline or block comment. Therefore, this
-	 * sub-module will always return the most optimal value when the project has been marked as independent.
-	 * However, a warning will be issued stating there exists a TO-DO and it should be implemented or removed.
+	 * OLD DOC: WILL UPDATE IF IS_INDEPENDENT CONFIGURATION ISN'T IMPLEMENTED:
+	 *      The following is for projects developed within a collaborate environment; which is enabled by default.
+	 *      For independent projects, TO-DO comments will be treated as an inline or block comment. Therefore, this
+	 *      sub-module will always return the most optimal value when the project has been marked as independent.
+	 *      However, a warning will be issued stating there exists a TO-DO and it should be implemented or removed.
 	 *
-	 * Old Formula: analysis.optimalValue = 1 / (Math.pow(todoFound, Math.E) + 1); <- Scales too fast
+	 *      Old Formula: analysis.optimalValue = 1 / (Math.pow(todoFound, Math.E) + 1); <- Scales too fast
 	 *
-	 * @return the optimal value of comments that fall under the sub-class of TO-DO
+	 * @param unit The compilationUnit that will be analysed
+	 * @return Analysis object with optimalValue = 1 if no to-do comments were found, otherwise: 0.5 * (0.5 / todoFound)
 	 */
 	private Analysis analyseTodo(CompilationUnit unit) {
 		Analysis analysis = new Analysis();
@@ -172,15 +195,18 @@ public class NumberOfComments implements ModuleInterface {
 	}
 
 
-
 	/**
 	 * At no point in time can a class have more than a single copyright HEADER.
 	 * If a class does not contain a copyright header, then this is considered neither negative nor positive.
-	 * 		i.e. the optimal value for that file will be 0.5
+	 * i.e. the optimal value for that file will be 0.5
 	 *
 	 * WARNING: This function will check all comments for Copyright information. This may result in false positives.
 	 *
-	 * @return the optimal value for comments that fall under copyright headers
+	 * @param unit The compilationUnit that will be analysed
+	 * @return Analysis object with optimalValue =
+	 * 		0.5 If no header found,
+	 * 		1 * inlineCopyrights / copyrightsFound,
+	 * 		1 - totalCopyrightsFound / TotalComments
 	 */
 	private Analysis analyseCopyright(CompilationUnit unit) {
 		List<String> criteria = new ArrayList<>(Arrays.asList("copyright", "copy-right", "copy right", "license"));
@@ -213,7 +239,7 @@ public class NumberOfComments implements ModuleInterface {
 		// Need to think about these some more.
 		if (headerIsCorrectType) 	weight = 1;
 		if (inline != 0) 			weight *= 1 - (inline / (double) copyrightsFound);
-		if (copyrightsFound > 1) 	weight *= 1- copyrightsFound/(double)comments;
+		if (copyrightsFound > 1) 	weight *= 1 - copyrightsFound/(double)comments;
 
 		analysis.optimalValue = weight;
 		return analysis;
@@ -249,7 +275,10 @@ public class NumberOfComments implements ModuleInterface {
 	 * </pre>
 	 * <p>
 	 *
-	 * @return the <code>optimalValue</code> between the range [0-1]
+	 * @param unit The compilationUnit that will be analysed
+	 * @return Analysis object with optimalValue =
+	 *      1 if line comment segmentation is present, otherwise:
+	 *      1 - totalLineCommentsSegmented / totalComments
 	 *
 	 */
 	private Analysis analyseLineCommentSegmentation(CompilationUnit unit) {
