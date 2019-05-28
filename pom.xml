@@ -7,6 +7,10 @@
     <groupId>SoftwareQuality</groupId>
     <artifactId>SENG4430</artifactId>
     <version>1.0-SNAPSHOT</version>
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
     <build>
         <plugins>
@@ -15,6 +19,9 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
+                    <compilerArgs>
+                        <arg>-Xlint</arg>
+                    </compilerArgs>
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
@@ -27,6 +34,7 @@
                     <argLine>
                         --illegal-access=permit
                     </argLine>
+                    <argLine>-Dfile.encoding=UTF-8</argLine>
                 </configuration>
             </plugin>
             <plugin>

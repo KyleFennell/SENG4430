@@ -20,7 +20,7 @@ public class ModuleManager {
 
     private static List<ModuleInterface> m_modules = new ArrayList<>();
     private static List<ModuleInterface> m_loadedModules = new ArrayList<>();
-    private static Adjustment adjustments = new Adjustment();
+    private static final Adjustment ADJUSTMENTS = new Adjustment();
 
     /**
      * Get the list of loaded modules as modules.ModuleInterface Objects
@@ -102,16 +102,21 @@ public class ModuleManager {
      */
     public static boolean loadModule(String m){
         ModuleInterface module = getModuleByName(m);
+        if(module == null){
+            return false;
+        }
         if (m_loadedModules.contains(module)){
             Logger.log("module " + m + " already loaded");
             return false;
         }
         if (m_loadedModules.add(module)){
             if(module instanceof AdjustableModuleInterface){
+                //create adjustment for module
+                Adjustment modAdjust = ADJUSTMENTS.setModuleAccess(m);
                 //load default settings
-                adjustments.addDefaults(((AdjustableModuleInterface) module).getDefaults());
+                modAdjust.addDefaults(((AdjustableModuleInterface) module).getDefaults());
                 //give the module the adjustments
-                ((AdjustableModuleInterface) module).setAdjustments(adjustments.setModuleAccess(m));
+                ((AdjustableModuleInterface) module).setAdjustments(modAdjust);
             }
             return true;
         }

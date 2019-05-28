@@ -12,6 +12,11 @@ import java.util.Properties;
  */
 public class ExtendedProperties extends Properties{
     
+    public ExtendedProperties(){
+        super();
+        this.defaults = new Properties();
+    }
+    
     public void addDefault(String key,String value){
         this.defaults.setProperty(key, value);
     }
@@ -26,6 +31,10 @@ public class ExtendedProperties extends Properties{
     
     public String getDefault(String key){
         return this.defaults.getProperty(key);
+    }
+    
+    protected String getDefaultKeys(){
+        return this.defaults.keySet().toString();
     }
     
 }

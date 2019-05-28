@@ -23,7 +23,7 @@ public class Adjustment{
         this.moduleIdentifier = moduleIdentifier;
         props = new ExtendedProperties();
         try{
-            InputStream input = getClass().getResourceAsStream("src/main/resources/config.properties");
+            InputStream input = getClass().getResourceAsStream("/config.properties");
             props.load(input);
         }catch(IOException exception){
             utils.Logger.warning("The configuration file could not be read!");
@@ -41,34 +41,35 @@ public class Adjustment{
      * @return A new Adjustment with the same settings but other accessibility.
      */
     public Adjustment setModuleAccess(String moduleIdentifier){
-        return new Adjustment(props,moduleIdentifier+"_");
+        return new Adjustment(props,moduleIdentifier);
     }
     
     public void addDefaults(Map<String,String> map){
         map.forEach((String key, String value) -> {
-            props.addDefault(moduleIdentifier+key, value);
+            props.addDefault(moduleIdentifier+"_"+key, value);
         });
     }
     
     public String getString(String identifier){
         try{
-           return props.getProperty(moduleIdentifier+identifier);
+           return props.getProperty(moduleIdentifier+"_"+identifier);
         }catch(IllegalArgumentException exception){
             utils.Logger.error("Module "+moduleIdentifier+" tried to access a property for which it didn't gave a default value!");
+            //System.out.println(props.getDefaultKeys());
             return null;
         }
     }
     
     public int getInt(String identifier){
         try{
-            return Integer.parseInt(props.getProperty(moduleIdentifier+identifier));
+            return Integer.parseInt(props.getProperty(moduleIdentifier+"_"+identifier));
         }catch(NumberFormatException exception){
             String tempModuleString = "".equals(moduleIdentifier) ? "" : (" of module " + moduleIdentifier);
             int defaultNumber = 0;
             try{
-                 defaultNumber = Integer.parseInt(props.getDefault(moduleIdentifier+identifier));
+                 defaultNumber = Integer.parseInt(props.getDefault(moduleIdentifier+"_"+identifier));
             }catch(NumberFormatException error){
-                utils.Logger.error("The default value for "+moduleIdentifier+identifier+ "can NOT interpreted as int!");
+                utils.Logger.error("The default value for "+moduleIdentifier+"_"+identifier+ "can NOT interpreted as int!");
             }
             utils.Logger.log("The Setting" + tempModuleString + " with the name "+identifier+
                     " was not an integer. Default number of "+defaultNumber+ " was used.");

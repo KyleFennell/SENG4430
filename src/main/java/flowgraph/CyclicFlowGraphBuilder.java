@@ -21,7 +21,6 @@ public class CyclicFlowGraphBuilder extends AbstractFlowGraphBuilder{
     
     @Override
     protected FlowGraph exploreLabeledStatement(LabeledStmt stmt){
-      //TODO: think about it. It the change acceptable? Or just test it!
       FlowGraph graph = new FlowGraph();
       String key = stmt.getLabel().getIdentifier();
       labeledContinueStartPoints.put(key, graph.start);
@@ -35,8 +34,11 @@ public class CyclicFlowGraphBuilder extends AbstractFlowGraphBuilder{
     
     @Override
     protected FlowGraph exploreContinueStatement(ContinueStmt stmt){
-        //TODO: Continue statements CAN HAVE a label
-        return new FlowGraph(continueStartPoint);
+        if(stmt.getLabel().isEmpty()){
+            return new FlowGraph(continueStartPoint);
+        }else{
+            return new FlowGraph(labeledContinueStartPoints.get(stmt.getLabel().get().getIdentifier()));
+        }
     }
     
     @Override

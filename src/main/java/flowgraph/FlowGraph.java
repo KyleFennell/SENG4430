@@ -228,8 +228,8 @@ public class FlowGraph {
      * @return number of edges
      */
     public int getEdgeCount(){
-        HashSet<FlowGraphNode> visited = new HashSet();
-        LinkedList<FlowGraphNode> queue = new LinkedList();
+        HashSet<FlowGraphNode> visited = new HashSet<>();
+        LinkedList<FlowGraphNode> queue = new LinkedList<>();
         queue.add(start);
         visited.add(start);
         int counter = 0;
@@ -256,8 +256,8 @@ public class FlowGraph {
      * @return number of nodes
      */
     public int getNodeCount(){
-        HashSet<FlowGraphNode> visited = new HashSet();
-        LinkedList<FlowGraphNode> queue = new LinkedList();
+        HashSet<FlowGraphNode> visited = new HashSet<>();
+        LinkedList<FlowGraphNode> queue = new LinkedList<>();
         queue.add(start);
         visited.add(start);
         while(!queue.isEmpty()){
@@ -269,7 +269,11 @@ public class FlowGraph {
             }
         }
         return visited.size();
-    }   
+    }
+    
+    public int getCyclomaticComplexity(){
+        return getEdgeCount() - getNodeCount() +2;
+    }
     
     /** Calculates the number of different path trough the graph.
      * 

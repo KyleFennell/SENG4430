@@ -14,12 +14,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import modules.CyclomaticComplexity;
 
 /**
  * Project          : Software Quality Assignment 1
  * Class name       : ConsoleInterface
  * Author(s)        : Kyle Fennell
- * Contributor(s)   : Ben Collins
+ * Contributor(s)   : Ben Collins, Nicolas Klenert
  * Date             : 28/03/19
  * Purpose          : This is the interface between the terminal and the program.
  *      It is essentially a command line parser but also controls the flow of
@@ -64,10 +65,11 @@ public class ConsoleInterface{
         //TODO: Add all modules here
         ModuleManager.registerModule(new LengthOfCode());
         ModuleManager.registerModule(new LengthOfConditionalBlocks());
+        ModuleManager.registerModule(new CyclomaticComplexity());
     }
 
     /**
-     * @param command full string containing the command followed by the arguements
+     * @param command full string containing the command followed by the arguments
      * @return null on failure, "" on success
      */
     private String parseCommand(String command){
@@ -102,7 +104,7 @@ public class ConsoleInterface{
         return null;
     }
 
-    /** Lists all commands and their arguement format
+    /** Lists all commands and their argument format
      * @return string of all commands
      */
     private String listCommands(){
@@ -195,12 +197,16 @@ public class ConsoleInterface{
                 }
 
                 Path sourcePath = Paths.get(args[0]);
-                if (!Files.exists(sourcePath)) {
-                    Logger.error("Command 'Load' - Path entered is invalid.");
+                if (!Files.isDirectory(sourcePath)) {
+                    Logger.error("Command 'Load' - Path entered is invalid. Only Directories are allowed");
                     return null;
                 }
 
-                sourceRoot = new SourceRoot(sourcePath);
+                try{
+                    sourceRoot = new SourceRoot(sourcePath);
+                }catch(IllegalArgumentException exception){
+                    Logger.error(exception.getMessage());
+                }
 
                 return "";
             }
