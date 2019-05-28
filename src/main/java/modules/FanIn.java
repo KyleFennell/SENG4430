@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 public class FanIn implements ModuleInterface{
 
 
@@ -80,6 +81,5 @@ public class FanIn implements ModuleInterface{
     public String printMetrics() {
         return null;
     }
-
 
 }

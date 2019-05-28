@@ -1,8 +1,7 @@
-package tests.java;
+package modules;
 
 import com.github.javaparser.utils.SourceRoot;
-import modules.FanIn;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Paths;
