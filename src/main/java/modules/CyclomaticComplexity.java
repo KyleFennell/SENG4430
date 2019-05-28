@@ -7,6 +7,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.utils.SourceRoot;
 import flowgraph.CyclicFlowGraphBuilder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -46,7 +47,9 @@ public class CyclomaticComplexity implements AdjustableModuleInterface {
                     .findAll(ClassOrInterfaceDeclaration.class)
                     .stream()
                     .filter(c -> !c.isInterface())
-                    .map(c -> new ClassInfo(c))
+                    .map(c -> new ClassInfo(c,cu.getStorage().isPresent() ?
+                            cu.getStorage().get().getPath().toString() :
+                            "PATH NOT COMPUTABLE"))
                     .collect(Collectors.toList()));
         }
         classInfos.sort((c1,c2) -> c1.sum - c2.sum);
@@ -80,10 +83,14 @@ public class CyclomaticComplexity implements AdjustableModuleInterface {
     @Override
     public String printMetrics() {
         StringBuilder stringBuilder = new StringBuilder();
-        List<? extends Object> list = ("components".equals(config.getString("scope"))) ? blocks : classInfos;
-        for (Object o : list) {
-            stringBuilder.append(o.toString());
-            stringBuilder.append(System.getProperty("line.separator"));
+        if("components".equals(config.getString("scope"))){
+            int threshold = config.getInt("componentThreshold");
+            blocks.stream().filter(c -> c.cyclo >= threshold)
+                    .forEach(c -> stringBuilder.append(c.toString()).append(System.getProperty("line.separator")));
+        }else{
+            int threshold = config.getInt("classThreshold");
+            classInfos.stream().filter(c -> c.sum >= threshold)
+                    .forEach(c -> stringBuilder.append(c.toString()).append(System.getProperty("line.separator")));
         }
         return stringBuilder.toString();
     }
@@ -95,26 +102,29 @@ public class CyclomaticComplexity implements AdjustableModuleInterface {
 
     @Override
     public Map<String, String> getDefaults() {
-        return Map.of(
-                "threshold",        "7",
-                "scope",            "class"
-        );
+        Map<String, String> map = new HashMap<>();
+        map.put("classThreshold",       "40");
+        map.put("componentThreshold",   "10");
+        map.put("scope",                "class");
+        return map;
     }
     
     private class ClassInfo{
+        final String filePath;
         final String name;
         final ArrayList<CodeBlock> blocks;
         final int min;
         final int max;
         final int median;
         final int sum;
-        public ClassInfo(ClassOrInterfaceDeclaration classDeclaration){
+        public ClassInfo(ClassOrInterfaceDeclaration classDeclaration, String filePath){
             name = classDeclaration.getNameAsString();
+            this.filePath = filePath;
             blocks = new ArrayList<>();
             //get all methods
-            blocks.addAll(classDeclaration.getMethods().stream().map(m -> new Method((MethodDeclaration)m,name)).collect(Collectors.toList()));
+            blocks.addAll(classDeclaration.getMethods().stream().map(m -> new Method((MethodDeclaration)m,name,filePath)).collect(Collectors.toList()));
             //get all initializers
-            blocks.addAll(classDeclaration.findAll(InitializerDeclaration.class).stream().map(i -> new CodeBlock((InitializerDeclaration)i,name)).collect(Collectors.toList()));
+            blocks.addAll(classDeclaration.findAll(InitializerDeclaration.class).stream().map(i -> new CodeBlock((InitializerDeclaration)i,name,filePath)).collect(Collectors.toList()));
             //TODO: only sort if scope is class
             blocks.sort((CodeBlock c1, CodeBlock c2) -> c1.cyclo - c2.cyclo);
             if(!blocks.isEmpty()){
@@ -131,7 +141,15 @@ public class CyclomaticComplexity implements AdjustableModuleInterface {
         }
         @Override
         public String toString(){
-            return "";
+            StringBuilder builder = new StringBuilder();
+            builder.append(filePath)
+                   .append("; ClassName: ")
+                   .append(name)
+                   .append("; Number of Components: ")
+                   .append(blocks.size())
+                   .append("; Complexity: ")
+                   .append(sum);
+            return builder.toString();
         }
     }
     
@@ -140,12 +158,15 @@ public class CyclomaticComplexity implements AdjustableModuleInterface {
         int startLine;
         boolean isStatic;
         String className;
+        String filePath;        
+        
         public CodeBlock(){}
-        public CodeBlock(InitializerDeclaration init,String className){
+        public CodeBlock(InitializerDeclaration init, String className, String filePath){
             this.startLine = init.getBegin().isPresent() ? init.getBegin().get().line : -1;
             this.isStatic = init.isStatic();
             this.cyclo = builder.explore(init).getCyclomaticComplexity();
             this.className = className;
+            this.filePath = filePath;
         }
         @Override
         public String toString(){
@@ -156,12 +177,13 @@ public class CyclomaticComplexity implements AdjustableModuleInterface {
     
     private class Method extends CodeBlock{
         String name;
-        public Method(MethodDeclaration method, String className){
+        public Method(MethodDeclaration method, String className, String filePath){
             this.name = method.getNameAsString();
             this.isStatic = method.isStatic();
             this.startLine = method.getBegin().isPresent() ? method.getBegin().get().line : -1;
             this.cyclo = builder.explore(method).getCyclomaticComplexity();
             this.className = className;
+            this.filePath = filePath;
         }
         @Override
         public String toString(){
