@@ -1,10 +1,7 @@
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
-import modules.AverageLengthOfIdentifier;
-import modules.LengthOfCode;
-import modules.LengthOfConditionalBlocks;
-import modules.ModuleInterface;
+import modules.*;
 import utils.Logger;
 
 import java.io.IOException;
@@ -15,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
-import modules.CyclomaticComplexity;
 
 /**
  * Project          : Software Quality Assignment 1
@@ -68,6 +64,7 @@ public class ConsoleInterface{
         ModuleManager.registerModule(new LengthOfConditionalBlocks());
         ModuleManager.registerModule(new CyclomaticComplexity());
         ModuleManager.registerModule(new AverageLengthOfIdentifier());
+        ModuleManager.registerModule(new UnmeetableCode());
     }
 
     /**

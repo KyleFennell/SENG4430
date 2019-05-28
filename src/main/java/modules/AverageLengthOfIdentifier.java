@@ -45,7 +45,7 @@ public class AverageLengthOfIdentifier implements ModuleInterface {
     HIGH_STANDARD_DEVIATION_MESSAGE = "This category shows that identifiers vary by 2-3 words meaning that some identifiers will convey more meaning\n" +
             "than others. For this range it is suggest that more meaning is given to identifiers of shorter length to both\n" +
             "increase readability and keep the identifiers consistent in length\n";
-    private static final String MODULE_NAME = "Average Identifier Length",
+    private static final String MODULE_NAME = "AverageIdentifierLength",
             MODULE_DESCRIPTION = "This module calculates the average character length of all identifiers that appear in given Java file.\n" +
                     "The purpose of this is to get a sense of how much meaning the identifiers convey.\n" +
                     "Longer identifiers indicate more understandable code.";
@@ -102,7 +102,6 @@ public class AverageLengthOfIdentifier implements ModuleInterface {
         for (IdentifierVisitorArg arg : Arguments) {
             results.add(evaluateMetrics(arg));
         }
-        ArrayList<String> combined = new ArrayList<>();
         return combineStringArrays(results);
     }
 
