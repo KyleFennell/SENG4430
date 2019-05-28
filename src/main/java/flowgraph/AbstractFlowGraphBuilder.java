@@ -159,7 +159,7 @@ public abstract class AbstractFlowGraphBuilder {
         //set up last flowgraph and connect it normally
         FlowGraph last = explore(entries.get(entries.size()-1).getStatements(),true);
         graph.parallel_append(last);
-        ListIterator listIter = entries.listIterator(entries.size()-1);
+        ListIterator<SwitchEntry> listIter = entries.listIterator(entries.size()-1);
         while(listIter.hasPrevious()){
             SwitchEntry entry = (SwitchEntry) listIter.previous();
             if(!entry.isEmpty()){
@@ -173,13 +173,13 @@ public abstract class AbstractFlowGraphBuilder {
         return graph;
     }
     
-    protected abstract FlowGraph exploreLoopStatement(NodeWithBody stmt);
+    protected abstract <T extends Node> FlowGraph exploreLoopStatement(NodeWithBody<T> stmt);
     protected abstract FlowGraph exploreDoStatement(DoStmt stmt);
     
     protected FlowGraph exploreMethodDeclaration(MethodDeclaration method){
         //look if the method decleration has a body
         Optional<BlockStmt> opt = method.getBody();
-        if(opt.isEmpty()){
+        if(!opt.isPresent()){
             return null;
         }
         returnEndPoint = new FlowGraph.FlowGraphNode();
@@ -214,10 +214,23 @@ public abstract class AbstractFlowGraphBuilder {
             graph = exploreLabeledStatement((LabeledStmt)node);
         }else if(node instanceof ContinueStmt){
             graph = exploreContinueStatement((ContinueStmt)node);
-        }else if(node instanceof WhileStmt || node instanceof ForStmt || node instanceof ForEachStmt){
-            graph = exploreLoopStatement((NodeWithBody) node);
         }else if(node instanceof DoStmt){
             graph = exploreDoStatement((DoStmt) node);
+        }else if(node instanceof WhileStmt){
+            //All WhileStmts implement this specific interface
+            @SuppressWarnings("unchecked")
+            NodeWithBody<WhileStmt> cast = (NodeWithBody<WhileStmt>) node;
+            graph = exploreLoopStatement(cast);
+        }else if(node instanceof ForStmt){
+            //All ForStmts implement this specific interface
+            @SuppressWarnings("unchecked")
+            NodeWithBody<ForStmt> cast = (NodeWithBody<ForStmt>) node;
+            graph = exploreLoopStatement(cast);
+        }else if(node instanceof ForEachStmt){
+            //All ForEachStmts implement this specific interface
+            @SuppressWarnings("unchecked")
+            NodeWithBody<ForEachStmt> cast = (NodeWithBody<ForEachStmt>) node;
+            graph = exploreLoopStatement(cast);
         }else if(node instanceof MethodDeclaration){//methods (yet to included: lambda methods, MethodReferenceExpr and so on)
             graph = exploreMethodDeclaration((MethodDeclaration) node);
         }else if(node instanceof ReturnStmt){

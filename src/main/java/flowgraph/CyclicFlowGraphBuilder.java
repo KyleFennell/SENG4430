@@ -1,5 +1,6 @@
 package flowgraph;
 
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.nodeTypes.NodeWithBody;
 import com.github.javaparser.ast.stmt.ContinueStmt;
 import com.github.javaparser.ast.stmt.DoStmt;
@@ -34,15 +35,15 @@ public class CyclicFlowGraphBuilder extends AbstractFlowGraphBuilder{
     
     @Override
     protected FlowGraph exploreContinueStatement(ContinueStmt stmt){
-        if(stmt.getLabel().isEmpty()){
-            return new FlowGraph(continueStartPoint);
-        }else{
+        if(stmt.getLabel().isPresent()){
             return new FlowGraph(labeledContinueStartPoints.get(stmt.getLabel().get().getIdentifier()));
+        }else{
+            return new FlowGraph(continueStartPoint);
         }
     }
     
     @Override
-    protected FlowGraph exploreLoopStatement(NodeWithBody stmt){
+    protected <T extends Node> FlowGraph exploreLoopStatement(NodeWithBody<T> stmt){
         Pair<FlowGraph,Pair<FlowGraph.FlowGraphNode,FlowGraph.FlowGraphNode>> triple = FlowGraph.createLoopFlowGraph(false);
         continueStartPoint = triple.b.a;
         breakEndPoint = triple.a.end;
