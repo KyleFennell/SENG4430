@@ -1,5 +1,6 @@
 package flowgraph;
 
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.nodeTypes.NodeWithBody;
 import com.github.javaparser.ast.stmt.ContinueStmt;
 import com.github.javaparser.ast.stmt.DoStmt;
@@ -19,7 +20,7 @@ public class AcyclicFlowGraphBuilder extends AbstractFlowGraphBuilder{
     }
     
     @Override
-    protected FlowGraph exploreLoopStatement(NodeWithBody stmt){
+    protected <T extends Node> FlowGraph exploreLoopStatement(NodeWithBody<T> stmt){
         return exploreLoopLikeStatements(stmt);
     }
     
@@ -28,7 +29,7 @@ public class AcyclicFlowGraphBuilder extends AbstractFlowGraphBuilder{
         return exploreLoopLikeStatements(stmt);
     }
     
-    private FlowGraph exploreLoopLikeStatements(NodeWithBody stmt){
+    private <T extends Node> FlowGraph exploreLoopLikeStatements(NodeWithBody<T> stmt){
         FlowGraph graph = new FlowGraph(true);
         breakEndPoint = graph.end;
         graph = explore(stmt.getBody(),true).serial_merge(graph);

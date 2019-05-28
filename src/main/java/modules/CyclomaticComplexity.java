@@ -122,9 +122,9 @@ public class CyclomaticComplexity implements AdjustableModuleInterface {
             this.filePath = filePath;
             blocks = new ArrayList<>();
             //get all methods
-            blocks.addAll(classDeclaration.getMethods().stream().map(m -> new Method((MethodDeclaration)m,name,filePath)).collect(Collectors.toList()));
+            blocks.addAll(classDeclaration.getMethods().stream().map(m -> new Method(m,name,filePath)).collect(Collectors.toList()));
             //get all initializers
-            blocks.addAll(classDeclaration.findAll(InitializerDeclaration.class).stream().map(i -> new CodeBlock((InitializerDeclaration)i,name,filePath)).collect(Collectors.toList()));
+            blocks.addAll(classDeclaration.findAll(InitializerDeclaration.class).stream().map(i -> new CodeBlock(i,name,filePath)).collect(Collectors.toList()));
             //TODO: only sort if scope is class
             blocks.sort((CodeBlock c1, CodeBlock c2) -> c1.cyclo - c2.cyclo);
             if(!blocks.isEmpty()){

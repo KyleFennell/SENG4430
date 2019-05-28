@@ -12,6 +12,8 @@ import java.util.Properties;
  */
 public class ExtendedProperties extends Properties{
     
+    private static final long serialVersionUID = 122793759L;
+    
     public ExtendedProperties(){
         super();
         this.defaults = new Properties();
