@@ -5,49 +5,45 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.utils.SourceRoot;
-import utils.Logger;
-import utils.Util;
+import utils.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FanIn implements ModuleInterface{
+public class StringMatchFanIn implements ModuleInterface{
 
+    private Map<String, Integer> uniqueFanIn = new HashMap<>();
 
     @Override
     public String getName() {
-        return "Fan_In";
+        return "String_Match_Fan_In";
     }
 
     @Override
     public String[] executeModule(SourceRoot sourceRoot) {
-        Map<String, Map<String, Integer>> collatedTotalFanIn = new HashMap<>();
-        Map<String, Map<String, Integer>> collatedUniqueFanIn = new HashMap<>();
 
+        // loop through all files
         for (CompilationUnit unit : sourceRoot.getCompilationUnits()){
             Logger.debug("INITIAL PROCESSING FILE: " + unit.getStorage().get().getFileName());
 
-            Map<String, Integer> fileTotalFanIn = new HashMap<>();
-            Map<String, Integer> fileUniqueFanIn = new HashMap<>();
-
             List<MethodDeclaration> methodDeclarations = unit.findAll(MethodDeclaration.class);
-            for (MethodDeclaration m : methodDeclarations){
+            // for each method declared in the file
+            for (MethodDeclaration m : methodDeclarations) {
                 Logger.debug("ADDING METHOD: " + m.getNameAsString());
-                fileTotalFanIn.put(m.getNameAsString(), 0);
-                fileUniqueFanIn.put(m.getNameAsString(), 0);
+                // if the method has a unique name add it to the the hashmap
+                if (!uniqueFanIn.containsKey(m.getNameAsString())) {
+                    uniqueFanIn.put(m.getNameAsString(), 0);
+                }
             }
         }
 
-        // loop through all method body's finding all method calls
+        // re-loop through all the files
         for (CompilationUnit unit : sourceRoot.getCompilationUnits()){
             Logger.debug("RE-PROCESSING FILE: " + unit.getStorage().get().getFileName());
 
-            Map<String, Integer> fileTotalFanIn = new HashMap<>();
-            Map<String, Integer> fileUniqueFanIn = new HashMap<>();
-
             List<MethodDeclaration> methodDeclarations = unit.findAll(MethodDeclaration.class);
+            // loop through all method body's finding all method calls
             for (MethodDeclaration m : methodDeclarations){
                 Logger.debug("PROCESSING METHOD: " + m.getNameAsString());
 //                System.out.println("PROCESSING METHOD: " + m.getNameAsString());
@@ -55,31 +51,36 @@ public class FanIn implements ModuleInterface{
                     Logger.debug("BODY NOT PRESENT");
                     continue;
                 }
-                List<String> uniqueCalls = new ArrayList<>();
+
                 BlockStmt body = m.getBody().get();
                 List<MethodCallExpr> calls =  body.findAll(MethodCallExpr.class);
                 for (MethodCallExpr c : calls){
-                    String callItendifier = c.getNameAsString();
-                    if (!uniqueCalls.contains(callItendifier)){
-                        uniqueCalls.add(callItendifier);
-                        System.out.println("UNIQUE CALL IDENTIFIER: " + callItendifier);
+                    String callName = c.getNameAsString();
+                    if (!uniqueFanIn.containsKey(callName)){
+                        uniqueFanIn.put(callName, 0);
                     }
+                    uniqueFanIn.put(callName, uniqueFanIn.get(callName) + 1);
                 }
 
             }
         }
-        return new String[0];
+        return Util.calculateBasicMetrics(uniqueFanIn);
     }
 
     @Override
     public String getDescription() {
+
         return "";
     }
 
     @Override
-    public String printMetrics() {
-        return null;
-    }
+    public String printMetrics(){
+        String output = "String Match Fan In: \n";
+        for (String m : uniqueFanIn.keySet()){
+            output += m + ": " + uniqueFanIn.get(m) + "\n";
+        }
 
+        return output;
+    }
 
 }
