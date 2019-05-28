@@ -16,6 +16,7 @@ public class Util {
         }
         return keys;
     }
+
     public static String[] calculateBasicMetrics(Map<String, Integer> map){
         int max = 0;
         int total = 0;
@@ -61,4 +62,3 @@ public class Util {
         return -1;
     }
 }
-
