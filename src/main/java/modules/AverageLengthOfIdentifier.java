@@ -22,11 +22,20 @@ import com.github.javaparser.utils.SourceRoot;
 public class AverageLengthOfIdentifier implements ModuleInterface
 {
 	private ArrayList<String> collectedInformation;
+	private enum CollectionMode
+	{
+		ALL,
+		VARIABLES,
+		METHODS,
+		PARAMETER,
+		PACKAGES,
+		CLASSES
+	}
 	private static final String MODULE_NAME = "Average Identifier Length",
 			MODULE_DESCRIPTION = "This module calculates the average character length of all identifiers that appear in given Java file.\n" +
 								 "The purpose of this is to get a sense of how much meaning the identifiers convey.\n" +
 								 "Longer identifiers indicate more understandable code.";
-	private static final String
+	public static final String
 			ZERO_AVERAGE_MESSAGE = "This type is ignored as there are no identifiers of this type used.\n",
 
 	LOW_AVERAGE_MESSAGE = "This type of identifier falls in the low range, it indicates that the majority of identifiers used are very short in length.\n"+
@@ -95,29 +104,30 @@ public class AverageLengthOfIdentifier implements ModuleInterface
 	public String[] executeModule(SourceRoot sourceRoot)
 	{
 		ArrayList<CompilationUnit> units = (ArrayList<CompilationUnit>)sourceRoot.getCompilationUnits();
-		ArrayList<String>
-				methods  	= new ArrayList<>(),
-				variables 	= new ArrayList<>(),
-				classes  	= new ArrayList<>(),
-				packages 	= new ArrayList<>(),
-				parameters 	= new ArrayList<>();
+		ArrayList<IdentifierVisitorArg> Arguments = new ArrayList<>();
+
+		Arguments.add(new IdentifierVisitorArg(CollectionMode.ALL, new ArrayList<>(),"All Identifiers") );
+		Arguments.add(new IdentifierVisitorArg(CollectionMode.METHODS, new ArrayList<>(), "Method Identifiers"));
+		Arguments.add(new IdentifierVisitorArg(CollectionMode.VARIABLES, new ArrayList<>(), "Variable Identifiers"));
+		Arguments.add(new IdentifierVisitorArg(CollectionMode.CLASSES, new ArrayList<>(), "Class Identifiers"));
+		Arguments.add(new IdentifierVisitorArg(CollectionMode.PACKAGES, new ArrayList<>(), "Package Identifiers"));
+		Arguments.add(new IdentifierVisitorArg(CollectionMode.PARAMETER, new ArrayList<>(),"Parameter  Identifiers" ));
+
 
 		for(CompilationUnit unit : units)
 		{
-			unit.accept(new MethodVisitor(), methods);
-			unit.accept(new VariableVisitor(), variables);
-			unit.accept(new ClassVisitor(), classes);
-			unit.accept(new ParameterVisitor(), parameters);
-			unit.accept(new PackageVisitor(), packages);
+			for(IdentifierVisitorArg arg : Arguments)
+			unit.accept(new IdentifierVisitor(), arg);
 		}
 
-		String[] allIdentifiers = evaluateMetrics("All Identifiers", methods,variables,classes,parameters,packages);
-		String[] methodIdentifiers = evaluateMetrics("Method Identifiers",methods);
-		String[] variableIdentifiers = evaluateMetrics("Variable Identifiers",variables);
-		String[] classIdentifiers = evaluateMetrics("Class Identifiers",classes);
-		String[] parameterIdentifiers = evaluateMetrics("Parameter Identifiers",parameters);
-		String[] packageIdentifiers = evaluateMetrics("Package Identifiers",packages);
-		return combineStringArrays(allIdentifiers,methodIdentifiers,variableIdentifiers,classIdentifiers,parameterIdentifiers,packageIdentifiers);
+		ArrayList<String[]> results = new ArrayList<>();
+		for(IdentifierVisitorArg arg : Arguments)
+		{
+			results.add(evaluateMetrics(arg));
+		}
+		ArrayList<String> combined = new ArrayList<>();
+
+		return combineStringArrays(results);
 	}
 
 	/**
@@ -141,7 +151,7 @@ public class AverageLengthOfIdentifier implements ModuleInterface
 	 * @param arraysToCombine 	Arrays that are to be combined into new array.
 	 * @return 					Result of array combination.
 	 */
-	public String[] combineStringArrays(String[] ... arraysToCombine)
+	private String[] combineStringArrays (ArrayList<String[]> arraysToCombine)
 	{
 		int newArraySize = 0;
 		String[] combinedArray;
@@ -163,67 +173,51 @@ public class AverageLengthOfIdentifier implements ModuleInterface
 	}
 
 	/**
-	 * Takes a variable number of lists and calculates the combined size of the lists
-	 *
-	 * @param identifiers 	A variable number of identifier lists
-	 * @return 				total number of elements in lists
-	 */
-	public int  calculateNumberOfIdentifiers(ArrayList<String> ... identifiers)
-	{
-		int identifierCount = 0;
-		for (ArrayList<String> identifierList : identifiers)
-		{
-			identifierCount += identifierList.size();
-		}
-
-		return identifierCount;
-	}
-	/**
 	 * Calculates the average length of strings in multiple lists.
 	 *
-	 * @param identifierCount total number of strings in the lists.
 	 * @param identifiers 	A variable number of identifier lists
 	 * @return 				Average string size of given lists
 	 */
 
-	public double calculateAverageIdentifierLength(int identifierCount, ArrayList<String> ... identifiers)
+	private double calculateAverageIdentifierLength(ArrayList<String>  identifiers)
 	{
 		double  average = 0;
-		for(ArrayList<String> identifierList: identifiers)
+		if(identifiers.size() != 0)
 		{
-			for(String identifier : identifierList )
+			for (String identifier : identifiers)
 			{
 				average += identifier.length();
 			}
+			average /= identifiers.size();
+		} else
+		{
+				average = 0;
 		}
-		average = (identifierCount == 0 ) ? 0 :  average / identifierCount;
+
 		return average;
 	}
 
 	/**
 	 * Takes a variable number of lists containing strings and calculates the standard deviation in relation to string size
-	 * @param identifierCount Total number of strings in the lists.
 	 * @param average		Average string length of given lsits.
 	 * @param identifiers 	A variable number of identifier lists
 	 * @return 				total number of elements in lists
 	 */
 
-	public double calculateStandardDeviation( int identifierCount, double average, ArrayList<String> ... identifiers)
+	private double calculateStandardDeviation( double average, ArrayList<String>  identifiers)
 	{
 		double standardDeviation;
 		double difference;
-		if(identifierCount != 0)
+		if(identifiers.size() != 0)
 		{
 			standardDeviation = 0;
-			for (ArrayList<String> list : identifiers)
-			{
-				for (String identifier : list)
+				for (String identifier : identifiers)
 				{
 					difference = identifier.length() - average;
 					standardDeviation += difference * difference;
 				}
-			}
-			standardDeviation = Math.sqrt(standardDeviation / (float) identifierCount);
+
+			standardDeviation = Math.sqrt(standardDeviation / identifiers.size());
 		} else
 		{
 				standardDeviation = 0;
@@ -233,28 +227,27 @@ public class AverageLengthOfIdentifier implements ModuleInterface
 
 	/**
 	 * Calculates the metrics of this module as well as generates appropriate messages based off results
-	 * @param groupName		Name of the Identifier type (e.g. Class, Parameter, Method)
-	 * @param identifiers	Identifiers within this group to be examined
+	 * @param arg 			data object that contains the identifier type and all identifiers of that type
 	 * @return 				generated statistics for this group.
 	 */
 
-	public String[] evaluateMetrics(String groupName,ArrayList<String> ... identifiers )
+	private String[] evaluateMetrics(IdentifierVisitorArg arg)
 	{
+		ArrayList<String> identifiers = arg.data;
 		NumberFormat formatter = new DecimalFormat("#0.00");
-		int  identifierCount = calculateNumberOfIdentifiers(identifiers);
-		double average = calculateAverageIdentifierLength(identifierCount,identifiers);
-		double standardDeviation = calculateStandardDeviation(identifierCount,average,identifiers);
+		double average = calculateAverageIdentifierLength(identifiers);
+		double standardDeviation = calculateStandardDeviation(average,identifiers);
 
 		String[] metrics =
 				{
-						"Category of identifier: " + groupName,
-						"Number of identifiers: " + identifierCount,
+						"Category of identifier: " + arg.groupName,
+						"Number of identifiers: " + identifiers.size(),
 						"Average identifier length: " + formatter.format(average),
 						"Standard Deviation of identifiers: " + formatter.format(standardDeviation)
 				};
 
-		collectedInformation.add(groupName);
-		collectedInformation.add("Number of identifiers: " + identifierCount);
+		collectedInformation.add(arg.groupName);
+		collectedInformation.add("Number of identifiers: " + identifiers.size());
 		collectedInformation.add("Average identifier length: " + formatter.format(average));
 		collectedInformation.add("Standard Deviation of identifiers: " + formatter.format(standardDeviation)+ "\n");
 
@@ -296,85 +289,69 @@ public class AverageLengthOfIdentifier implements ModuleInterface
 	/**
 	 *	Collects all variable identifiers in the compilation unit
 	 */
-	private static class VariableVisitor extends VoidVisitorAdapter<ArrayList<String>>
+	private class IdentifierVisitor extends VoidVisitorAdapter<IdentifierVisitorArg>
 	{
 		@Override
-		public void  visit(VariableDeclarator n, ArrayList<String> arg)
+		public void  visit(VariableDeclarator n, IdentifierVisitorArg arg)
 		{
-			if(arg == null)
+			if( arg.mode == CollectionMode.VARIABLES || arg.mode == CollectionMode.ALL )
 			{
-				arg = new ArrayList<>();
+				arg.addData(n.getNameAsString());
 			}
-			arg.add(n.getNameAsString());
 			super.visit(n, arg);
 		}
-	}
-	/**
-	 *	Collects all variable identifiers in the compilation unit
-	 */
-
-	private static class MethodVisitor extends VoidVisitorAdapter<ArrayList<String>>
-	{
 		@Override
-		public void  visit(MethodDeclaration n, ArrayList<String> arg)
+		public void  visit(PackageDeclaration n, IdentifierVisitorArg arg)
 		{
-			if(arg == null)
+			if(arg.mode == CollectionMode.PACKAGES ||arg.mode == CollectionMode.ALL )
 			{
-				arg = new ArrayList<>();
+				arg.addData(n.getNameAsString());
 			}
-			arg.add(n.getNameAsString());
 			super.visit(n, arg);
 		}
-	}
-	/**
-	 *	Collects all class identifiers in the compilation unit
-	 */
-
-	private static class ClassVisitor extends VoidVisitorAdapter<ArrayList<String>>
-	{
 		@Override
-		public void  visit(ClassOrInterfaceDeclaration n, ArrayList<String> arg)
+		public void  visit(MethodDeclaration n, IdentifierVisitorArg arg)
 		{
-			if(arg == null)
+			if(arg.mode == CollectionMode.METHODS ||arg.mode == CollectionMode.ALL )
 			{
-				arg = new ArrayList<>();
+				arg.addData(n.getNameAsString());
 			}
-			arg.add(n.getNameAsString());
 			super.visit(n, arg);
 		}
-	}
-	/**
-	 *	Collects all parameter identifiers in the compilation unit
-	 */
-
-	private static class ParameterVisitor extends VoidVisitorAdapter<ArrayList<String>>
-	{
-		@Override
-		public void  visit(Parameter n, ArrayList<String> arg)
+		public void  visit(Parameter n, IdentifierVisitorArg arg)
 		{
-			if(arg == null)
+			if(arg.mode == CollectionMode.PARAMETER ||arg.mode == CollectionMode.ALL )
 			{
-				arg = new ArrayList<>();
+				arg.addData(n.getNameAsString());
 			}
-			arg.add(n.getNameAsString());
 			super.visit(n, arg);
 		}
+		public void visit(ClassOrInterfaceDeclaration n, IdentifierVisitorArg arg)
+		{
+			if(arg.mode == CollectionMode.CLASSES||arg.mode == CollectionMode.ALL )
+			{
+				arg.addData(n.getNameAsString());
+			}
+			super.visit(n, arg);
+		}
+
 	}
 
-	/**
-	 *	Collects all package identifiers in the compilation unit
-	 */
-	private static class PackageVisitor extends VoidVisitorAdapter<ArrayList<String>>
+	private class IdentifierVisitorArg
 	{
-		@Override
-		public void  visit(PackageDeclaration n, ArrayList<String> arg)
+		private CollectionMode mode;
+		private ArrayList<String> data;
+		private String groupName;
+		IdentifierVisitorArg(CollectionMode newMode, ArrayList<String> newData, String newGroupName)
 		{
-			if(arg == null)
-			{
-				arg = new ArrayList<>();
-			}
-			arg.add(n.getNameAsString());
-			super.visit(n, arg);
+			mode = newMode;
+			data = newData;
+			groupName = newGroupName;
+		}
+
+		void addData(String newData)
+		{
+			this.data.add(newData);
 		}
 	}
 }
