@@ -42,6 +42,10 @@ public class CyclomaticComplexity implements AdjustableModuleInterface {
     @Override
     public String[] executeModule(SourceRoot sourceRoot) {
         //TODO: Test
+        //clear all runs before that one
+        classInfos.clear();
+        blocks.clear();
+        //add and sort
         for (CompilationUnit cu : sourceRoot.getCompilationUnits()) {
             classInfos.addAll(cu
                     .findAll(ClassOrInterfaceDeclaration.class)
