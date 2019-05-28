@@ -1,11 +1,13 @@
 package modules;
 
 import com.github.javaparser.utils.SourceRoot;
-import org.junit.*;
-
 import java.nio.file.Paths;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
 
 /**
  * Project          : Software Quality Assignment
@@ -21,7 +23,7 @@ public class LengthOfConditionalBlocksTest {
     private LengthOfConditionalBlocks locb2;
     private static SourceRoot sourceRoot2;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() throws Exception {
         sourceRoot = new SourceRoot(Paths.get("C:\\dev\\java\\Java-Static-Analyzer\\src\\main\\java"));
         sourceRoot.tryToParse();
@@ -29,7 +31,7 @@ public class LengthOfConditionalBlocksTest {
         sourceRoot2.tryToParse();
     }
 
-    @Before
+    @BeforeEach
     public void setUpMethod() {
         locb = new LengthOfConditionalBlocks();
         locb2 = new LengthOfConditionalBlocks();
