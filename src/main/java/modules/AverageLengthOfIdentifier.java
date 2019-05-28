@@ -1,16 +1,8 @@
 package modules;
-/*	Author: Callan Hampton
- *  StudentNum: C3235869
- *
- *  TODO
- *  	Develop Unit tests
- *  	Error handling
- */
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -19,6 +11,11 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.utils.SourceRoot;
+
+/**
+ * @Author(s): Callan Hampton
+ * StudentNum: C3235869
+ */
 
 public class AverageLengthOfIdentifier implements ModuleInterface {
     public static final String
@@ -91,26 +88,21 @@ public class AverageLengthOfIdentifier implements ModuleInterface {
     public String[] executeModule(SourceRoot sourceRoot) {
         ArrayList<CompilationUnit> units = (ArrayList<CompilationUnit>) sourceRoot.getCompilationUnits();
         ArrayList<IdentifierVisitorArg> Arguments = new ArrayList<>();
-
         Arguments.add(new IdentifierVisitorArg(CollectionMode.ALL, new ArrayList<>(), "All Identifiers"));
         Arguments.add(new IdentifierVisitorArg(CollectionMode.METHODS, new ArrayList<>(), "Method Identifiers"));
         Arguments.add(new IdentifierVisitorArg(CollectionMode.VARIABLES, new ArrayList<>(), "Variable Identifiers"));
         Arguments.add(new IdentifierVisitorArg(CollectionMode.CLASSES, new ArrayList<>(), "Class Identifiers"));
         Arguments.add(new IdentifierVisitorArg(CollectionMode.PACKAGES, new ArrayList<>(), "Package Identifiers"));
         Arguments.add(new IdentifierVisitorArg(CollectionMode.PARAMETER, new ArrayList<>(), "Parameter  Identifiers"));
-
-
         for (CompilationUnit unit : units) {
             for (IdentifierVisitorArg arg : Arguments)
                 unit.accept(new IdentifierVisitor(), arg);
         }
-
         ArrayList<String[]> results = new ArrayList<>();
         for (IdentifierVisitorArg arg : Arguments) {
             results.add(evaluateMetrics(arg));
         }
         ArrayList<String> combined = new ArrayList<>();
-
         return combineStringArrays(results);
     }
 
@@ -158,7 +150,6 @@ public class AverageLengthOfIdentifier implements ModuleInterface {
      * @param identifiers A variable number of identifier lists
      * @return Average string size of given lists
      */
-
     private double calculateAverageIdentifierLength(ArrayList<String> identifiers) {
         double average = 0;
         if (identifiers.size() != 0) {
@@ -169,7 +160,6 @@ public class AverageLengthOfIdentifier implements ModuleInterface {
         } else {
             average = 0;
         }
-
         return average;
     }
 
@@ -210,7 +200,6 @@ public class AverageLengthOfIdentifier implements ModuleInterface {
         NumberFormat formatter = new DecimalFormat("#0.00");
         double average = calculateAverageIdentifierLength(identifiers);
         double standardDeviation = calculateStandardDeviation(average, identifiers);
-
         String[] metrics =
                 {
                         "Category of identifier: " + arg.groupName,
@@ -218,12 +207,10 @@ public class AverageLengthOfIdentifier implements ModuleInterface {
                         "Average identifier length: " + formatter.format(average),
                         "Standard Deviation of identifiers: " + formatter.format(standardDeviation)
                 };
-
         collectedInformation.add(arg.groupName);
         collectedInformation.add("Number of identifiers: " + identifiers.size());
         collectedInformation.add("Average identifier length: " + formatter.format(average));
         collectedInformation.add("Standard Deviation of identifiers: " + formatter.format(standardDeviation) + "\n");
-
         if (average == 0) {
             collectedInformation.add(ZERO_AVERAGE_MESSAGE);
         } else if (average <= LOW_AVERAGE) {
