@@ -73,7 +73,7 @@ public class CyclomaticComplexity implements AdjustableModuleInterface {
      */
     @Override
     public String getDescription() {
-        return "TODO";
+        return "";
     }
 
     /**
@@ -105,6 +105,7 @@ public class CyclomaticComplexity implements AdjustableModuleInterface {
         Map<String, String> map = new HashMap<>();
         map.put("classThreshold",       "40");
         map.put("componentThreshold",   "10");
+        //scope can be either class or components
         map.put("scope",                "class");
         return map;
     }
@@ -170,7 +171,13 @@ public class CyclomaticComplexity implements AdjustableModuleInterface {
         }
         @Override
         public String toString(){
-            return "";
+            StringBuilder builder = new StringBuilder();
+            String line = startLine == -1 ? "; Initializer in Class "+className : "; Initializer on Line "+startLine;
+            builder.append(filePath)
+                   .append(line)
+                   .append("; Complexity: ")
+                   .append(cyclo);
+            return builder.toString();
         }
         
     }
@@ -187,7 +194,14 @@ public class CyclomaticComplexity implements AdjustableModuleInterface {
         }
         @Override
         public String toString(){
-            return "";
+            StringBuilder builder = new StringBuilder();
+            String line = startLine == -1 ? "" : " on Line "+startLine;
+            builder.append(filePath)
+                   .append("; Method "+name)
+                   .append(line)
+                   .append("; Complexity: ")
+                   .append(cyclo);
+            return builder.toString();
         }
     }
     

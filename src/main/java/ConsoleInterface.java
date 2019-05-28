@@ -294,6 +294,17 @@ public class ConsoleInterface{
                 return "";
             }
         });
+        
+        m_commands.add(new Command(
+                "reload settings",
+                "reload the configurations given by the configuration file",
+                "<>"){
+            @Override
+            public String execute(String[] args){
+                ModuleManager.reloadSettings();
+                return "";
+            }
+        });
     }
 
     /**
