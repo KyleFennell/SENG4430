@@ -10,7 +10,7 @@ public class ModuleFanOutTests {
 
     @Test
     public void thisIsATestSoIDontHaveToRepro() throws IOException {
-        SourceRoot sourceRoot = new SourceRoot(Paths.get("C:/Users/Kyle/Dropbox/UoN/4.1/SENG4430/src/main/java"));
+        SourceRoot sourceRoot = new SourceRoot(Paths.get("src/main/java"));
         sourceRoot.tryToParse();
         FanOut fanOut = new FanOut();
         String[] results = fanOut.executeModule(sourceRoot);
