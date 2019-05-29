@@ -284,10 +284,10 @@ public class ConsoleInterface{
                     System.out.println(Arrays.toString(result));
                 }
 
-                System.out.println("\nDisplay more advanced analysis? (Y/n)");
+                System.out.println("\nDisplay more advanced analysis? (y/N)");
                 String choice = new Scanner(System.in).nextLine().toLowerCase();
 
-                if (!choice.equals("n") && !choice.equals("N")) {
+                if (choice.equals("y")) {
                     for (String metric : allMetrics) {
                         System.out.println("-------------------------------------------------------------");
                         System.out.println(metric);
