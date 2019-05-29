@@ -19,7 +19,7 @@ public class AcyclicFlowGraphBuilderTest {
     @ParameterizedTest(name = "[{index}]: {1}")
     @CsvFileSource(resources = "/flowgraph/testdata/acyclic.csv", numLinesToSkip = 1)
     public void testAcyclicFlowGraphBuilder(String code, String file){
-       TestUtils.compareGraphs(file, code, builder);
+       TestUtils.compareGraphs(file, code, builder, "Statement");
     }
     
 }

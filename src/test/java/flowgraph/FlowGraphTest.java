@@ -40,6 +40,14 @@ public class FlowGraphTest {
     }
     
     @Test
+    public void testMerge(){
+        FlowGraph graph = new FlowGraph(true);
+        graph.merge(new FlowGraph(true));
+        assertEquals(1,graph.getEdgeCount());
+        assertEquals(2,graph.getNodeCount());
+    }
+    
+    @Test
     public void testNumberOfPaths(){
         FlowGraph empty = new FlowGraph();
         assertEquals(1,empty.getNumberOfPaths());

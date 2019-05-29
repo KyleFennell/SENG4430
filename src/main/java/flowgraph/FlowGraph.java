@@ -3,6 +3,7 @@ package flowgraph;
 import com.github.javaparser.utils.Pair;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,12 +13,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-/**
- * Project          : Software Quality Assignment 1
- * Class name       : FlowGraph
- * @author(s)       : Nicolas Klenert
- * Date             : 04/05/19
- * Purpose          : Represents the flow of code. Used to calculate different metrics.
+/** Represents the flow of code. Used to calculate different metrics.
+ * 
+ *  <p>Almost all Methods in this class are changing the given parameter and the {@code FlowGraph} itself.<br>
+ *  Therefore handle this class with caution.</p>
+ * 
+ * <p>Project          : Software Quality Assignment 1<br>
+ *    Date             : 04/05/19</p>
+ * 
+ * @author Nicolas Klenert
+ * @see AbstractFlowGraphBuilder
+ * 
  */
 public class FlowGraph {
     protected static class FlowGraphNode{
@@ -137,6 +143,10 @@ public class FlowGraph {
             return node;
         };
         
+        Path sourcePath = Paths.get(fileSrc);
+        if(!Files.isRegularFile(sourcePath)){
+            utils.Logger.error("File to create FlowGraph not found! Filepath: "+fileSrc);
+        }
         try (Stream<String> stream = Files.lines(Paths.get(fileSrc))) {
             stream.forEach((String line) -> {
                 if(line.startsWith("*")){
@@ -155,14 +165,33 @@ public class FlowGraph {
                 }
             });
         } catch (IOException ex) {
-            //TODO: change logging
-            Logger.getLogger(FlowGraph.class.getName()).log(Level.SEVERE, null, ex);
+            utils.Logger.error("File to create FlowGraph not found! Filepath: "+fileSrc);
         }
     }
     
+    /** Merges the end node of the graph to the start node of the other graph.
+     * 
+     * This process is NOT symmetric.
+     * 
+     * @param graph the graph which will be appended at the end
+     * @return A FlowGraph which has exactly double the length.
+     */
     public FlowGraph serial_merge(FlowGraph graph){
         end.merge(graph.start);
         end = graph.end;
+        return this;
+    }
+    
+    /** Merges start and end node of two graphs together.
+     * 
+     *  This process is symmetric.
+     * 
+     * @param graph the victim of the process. Will be changed by this process.
+     * @return FlowGraph which contains all nodes except the start and end node of the victim graph.
+     */
+    public FlowGraph merge(FlowGraph graph){
+        start.merge(graph.start);
+        end.merge(graph.end);
         return this;
     }
     

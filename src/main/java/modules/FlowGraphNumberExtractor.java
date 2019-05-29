@@ -7,6 +7,7 @@ package modules;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.utils.SourceRoot;
@@ -121,6 +122,9 @@ abstract public class FlowGraphNumberExtractor  implements AdjustableModuleInter
         return map;
     }
     
+    /** Class and it's children are used to store the information gathered.
+     * 
+     */
     private class ClassInfo{
         final String filePath;
         final String name;
@@ -134,9 +138,20 @@ abstract public class FlowGraphNumberExtractor  implements AdjustableModuleInter
             this.filePath = filePath;
             blocks = new ArrayList<>();
             //get all methods -> constructors are not yet involved!
-            blocks.addAll(classDeclaration.getMethods().stream().map(m -> new Method(m,name,filePath)).collect(Collectors.toList()));
+            blocks.addAll(classDeclaration.getMethods()
+                    .stream()
+                    .map(m -> new Method(m,name,filePath))
+                    .collect(Collectors.toList()));
+            //get all constructor
+            blocks.addAll(classDeclaration.findAll(ConstructorDeclaration.class)
+                    .stream()
+                    .map(c -> new Constructor(c,name,filePath))
+                    .collect(Collectors.toList()));
             //get all initializers
-            blocks.addAll(classDeclaration.findAll(InitializerDeclaration.class).stream().map(i -> new CodeBlock(i,name,filePath)).collect(Collectors.toList()));
+            blocks.addAll(classDeclaration.findAll(InitializerDeclaration.class)
+                    .stream()
+                    .map(i -> new CodeBlock(i,name,filePath))
+                    .collect(Collectors.toList()));
             //TODO: only sort if scope is class
             blocks.sort((CodeBlock c1, CodeBlock c2) -> c1.number - c2.number);
             if(!blocks.isEmpty()){
@@ -214,6 +229,32 @@ abstract public class FlowGraphNumberExtractor  implements AdjustableModuleInter
             builder.append(filePath)
                    .append("; Method ")
                    .append(name)
+                   .append(line)
+                   .append("; ")
+                   .append(getNameOfNumber())
+                   .append(": ")
+                   .append(number);
+            return builder.toString();
+        }
+    }
+    
+    private class Constructor extends CodeBlock{
+        String declarationName;
+        public Constructor(ConstructorDeclaration declaration, String className ,String filePath){
+            this.declarationName = declaration.getDeclarationAsString(true, false, true);
+            this.isStatic = false;
+            this.startLine = declaration.getBegin().isPresent() ? declaration.getBegin().get().line : -1;
+            this.number = builder.explore(declaration).getCyclomaticComplexity();
+            this.className = className;
+            this.filePath = filePath;
+        }
+         @Override
+        public String toString(){
+            StringBuilder builder = new StringBuilder();
+            String line = startLine == -1 ? "" : " on Line "+startLine;
+            builder.append(filePath)
+                   .append("; Constructor ")
+                   .append(declarationName)
                    .append(line)
                    .append("; ")
                    .append(getNameOfNumber())

@@ -20,29 +20,26 @@ while(i < 0){x=0;},loop1,Simple While Loop
 for(;;){for(;;){x=0;}},loop2,Nested For Loop
 do {x=0;} while(i < 0);,do1,Simple Do Loop
 for(;;){if(true) break;},break1,Simple Break
-x = true ? 3 : 5;,,
-x = (true ? (true ? 1 : 2) : 3);,,
-"loop1:
-while(i<20){	
-	if(i==10) break loop1;
-	i++;}",,
+x = true ? 3 : 5;,if6,Ternary
+x = (true ? (true ? 1 : 2) : 3);,if7,Nested Ternary
+loop1:while(i<20){if(i==10) break loop1;i++;},break1,Simple Labeled Break
 "loop2:
 for(int i=0;i<2;i++)
 for(int j=0;j<5;j++)
 {	
 	if(j==2) break loop2;
-}",,
+}",breakLabel2,Nested Labeled Break
 "loop1:
 while(i<20){	
 	if(i==10) continue loop1;
-	i++;}",,
+	i++;}",continue1,Simple Labeled Continue
 "loop2:
 for(int i=0;i<2;i++)
 for(int j=0;j<5;j++)
 {	
 	if(j==2) continue loop2;
-}",,
+}",continue2,Nested Labeled Continue
 "loop2:
 for(int i=0;i<2;i++){
 for(int j=0;j<5;j++){if(j==2) continue loop2;}
-if(i==3) break loop2}",,
+if(i==3) break loop2;}",mixLabel1,Nested Labeled Break and Continue

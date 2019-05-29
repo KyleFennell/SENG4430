@@ -9,15 +9,17 @@ import com.github.javaparser.utils.Pair;
 import java.util.HashSet;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 
-/**
- *
+/** Tests the {@link FlowGraph} created from {@link CyclicFlowGraphBuilder}.
+ * 
+ * <p>Project          : Software Quality Assignment 1<br>
+ * Date             : 14/05/19</p>
+ * 
  * @author Nicolas Klenert
+ * @see CyclicFlowGraphBuilder
  */
 public class CyclicFlowGraphBuilderTest {
     
@@ -27,15 +29,26 @@ public class CyclicFlowGraphBuilderTest {
     
     /** Parameterized Test used to compare created FlowGraph of CyclicFlowGraphBuilder with given graph.
      * 
-     * @param code code snippet used to create the FlowGraph
+     * @param code code snippet used to create the FlowGraph, has to represent a statement
      * @param file filename of the saved graph
      */
     @DisplayName("CyclicFlowGraphBuilder behaviour")
     @ParameterizedTest(name = "[{index}]: {2}")
     @CsvFileSource(resources = "/flowgraph/testdata/cyclic.csv", numLinesToSkip = 1)
-    public void testAcyclicFlowGraphBuilder(String code, String file){
-       assumeTrue(file != null && !file.isEmpty(),"graph "+file+" not given!");
-       TestUtils.compareGraphs(file, code, builder);
+    public void testCyclicFlowGraphBuilderStatements(String code, String file){
+       TestUtils.compareGraphs(file, code, builder, "Statement");
+    }
+    
+    /** Parameterized Test used to compare created FlowGraph of CyclicFlowGraphBuilder with given graph.
+     * 
+     * @param code code snippet used to create the FlowGraph, has to represent a method
+     * @param file filename of the saved graph
+     */
+    @DisplayName("CyclicFlowGraphBuilder behaviour")
+    @ParameterizedTest(name = "[{index}]: {2}")
+    @CsvFileSource(resources = "/flowgraph/testdata/methods.csv", numLinesToSkip = 1)
+    public void testCyclicFlowGraphBuilderBodies(String code, String file){
+        TestUtils.compareGraphs(file, code, builder, "Method");
     }
     
     /**
@@ -60,24 +73,5 @@ public class CyclicFlowGraphBuilderTest {
             assertEquals(sizes[i], result.a.size());
             assertEquals(bools[i], result.b);
         }
-    }
-           
-    /**
-     * Test of explore method regarding continue statements, of class FlowGraphBuilder.
-     */
-    @Test
-    @Disabled
-    public void testExploreLoopsWithContinues(){
-        //only exist as an reminder: Continues can also be labeled!
-    }
-    
-    /**
-     * Test of explore method regarding methods, of class FlowGraphBuilder.
-     */
-    @Test
-    @Disabled
-    public void testMethod(){
-        
-    }
-    
+    }    
 }

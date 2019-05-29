@@ -1,0 +1,3 @@
+code snippet,graph file name,display name
+public int testMethod(){if(x==0){return 1;}else{return 2;}},if6,Simple Method
+public int testMethod(){return x == 0 ? 5 : 3;},method1,Simple Method

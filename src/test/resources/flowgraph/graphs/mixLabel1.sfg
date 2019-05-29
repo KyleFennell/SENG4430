@@ -1,0 +1,24 @@
+# 1 is label start
+# 2 is first condition
+# 3 is label end
+# 4 is inner loop structure
+# 5 is second condition
+* 1 3
+1 2
+2 3
+2 4
+4 5
+# second condition goes to end (which is an if statement)
+5 9
+9 10
+9 11
+#one goes to the label end (break) the other is default, such it goes to condition 1
+10 3
+11 2
+# or it goes into inner loop
+9 6
+# inner loop is if condition with two possibilities: default is to second cond. other one is continue
+6 7
+6 8
+7 5
+8 1

@@ -8,25 +8,45 @@ import com.github.javaparser.ast.stmt.LabeledStmt;
 import com.github.javaparser.utils.Pair;
 import java.util.HashMap;
 
-/**
- * Project          : Software Quality Assignment 1
- * Class name       : CyclicFlowGraphBuilder
- * @author(s)       : Nicolas Klenert
- * Date             : 26/05/19
- * Purpose          : Creates possible cyclic FlowGraphs out of a parse tree.
+/** Creates possible cyclic {@code FlowGraphs} out of some {@link Node} and it's children.
+ * 
+ *  <p>This class contains only "explore" methods, which have a similar
+ * effect as the one described in {@link AbstractFlowGraphBuilder}<br>
+ * 
+ *  Because their use case are similar, we won't give a JavaDoc for these functions.</p>
+ * 
+ * <p>Project          : Software Quality Assignment 1<br>
+ *    Date             : 26/05/19</p>
+ * 
+ * @author Nicolas Klenert
+ * @see AbstractFlowGraphBuilder
+ * @see AcyclicFlowGraphBuilder
+ * 
  */
 public class CyclicFlowGraphBuilder extends AbstractFlowGraphBuilder{
-       
+    
+    /** 
+     * Value to save the node to which the continue Statements must point to.
+     */
     private FlowGraph.FlowGraphNode continueStartPoint;
+    
+    /**
+     * Map of the name of labels and their corresponding nodes.
+     */
     protected HashMap<String,FlowGraph.FlowGraphNode> labeledContinueStartPoints;
+    
+    public CyclicFlowGraphBuilder(){
+        super();
+        labeledContinueStartPoints = new HashMap<>();
+    }
     
     @Override
     protected FlowGraph exploreLabeledStatement(LabeledStmt stmt){
-      FlowGraph graph = new FlowGraph();
+      FlowGraph graph = new FlowGraph(false);
       String key = stmt.getLabel().getIdentifier();
       labeledContinueStartPoints.put(key, graph.start);
       labeledBreakEndPoints.put(key, graph.end);
-      graph = explore(stmt.getStatement(),true).serial_merge(graph);
+      graph = explore(stmt.getStatement(),true).merge(graph);
       //not necessary, but good for debugging
       labeledBreakEndPoints.remove(key);
       labeledContinueStartPoints.remove(key);
