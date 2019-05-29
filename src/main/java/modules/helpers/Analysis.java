@@ -1,5 +1,6 @@
 package modules.helpers;
 
+import com.github.javaparser.Range;
 import com.mitchtalmadge.asciidata.table.ASCIITable;
 import com.mitchtalmadge.asciidata.table.formats.ASCIITableFormat;
 
@@ -14,11 +15,11 @@ public class Analysis {
 		setWarnings(new ArrayList<>());
 	}
 
-	String asPercentage() {
+	public String asPercentage() {
 		return String.format("%.2f", getOptimalValue() *100) + "%";
 	}
 
-	String printWarnings() {
+	public String printWarnings() {
 		if (!getWarnings().isEmpty()) {
 			String[] headers = { "Line", "Cause", "Fix" };
 			String[][] data = new String[getWarnings().size()][];
@@ -31,27 +32,21 @@ public class Analysis {
 
 			return ASCIITable.fromData(headers, data).withTableFormat(new ASCIITableFormat()).toString();
 		}
-		return null;
+		return "No Warnings";
 	}
 
-
-	public List<Warning> getWarnings() {
-		return warnings;
+	public void addWarning(Warning warning) {
+		warnings.add(warning);
 	}
 
-
-	public void setWarnings(List<Warning> warnings) {
-		this.warnings = warnings;
+	public void addWarning(String cause, String recommendation, Range origin) {
+		warnings.add(new Warning<>(cause, recommendation, origin));
 	}
 
+	public List<Warning> getWarnings() { return warnings; }
+	public void setWarnings(List<Warning> warnings) { this.warnings = warnings; }
 
-	public double getOptimalValue() {
-		return optimalValue;
-	}
-
-
-	public void setOptimalValue(double optimalValue) {
-		this.optimalValue = optimalValue;
-	}
+	public double getOptimalValue() { return optimalValue; }
+	public void setOptimalValue(double optimalValue) { this.optimalValue = optimalValue; }
 
 }

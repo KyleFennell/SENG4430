@@ -141,10 +141,10 @@ public class NumberOfComments implements ModuleInterface {
 			NameExpr key = entry.getKey();
 			Boolean value = entry.getValue();
 			if (value) methodsConforming++;
-			else fileAnal.getWarnings().add(new Warning<>(
+			else fileAnal.addWarning(
 					"No Javadoc associated with " + unit.getStorage().get().getFileName() + "::"+ key.getNameAsString(),
 					"Add Javadoc or move if whitespace exists between method.",
-					key.getRange().get()));
+					key.getRange().get());
 		}
 
 		if (!methodDocMap.isEmpty())
@@ -181,7 +181,7 @@ public class NumberOfComments implements ModuleInterface {
 		for (Comment c : unit.getAllContainedComments()) {
 			if (criteria.stream().anyMatch(c.getContent().toLowerCase()::contains)) {
 				todoFound++;
-				analysis.getWarnings().add(new Warning<>("TODO found.", "Implement or remove TODO.", c.getRange().get()));
+				analysis.addWarning("TODO found.", "Implement or remove TODO.", c.getRange().get());
 			}
 		}
 
@@ -226,10 +226,12 @@ public class NumberOfComments implements ModuleInterface {
 						headerIsCorrectType = true;
 					}
 				} else {
-					analysis.getWarnings().add(new Warning<>("Found block copyright comment but header already exists.", "Add to Javadoc or remove.", c.getRange().get()));
+					analysis.addWarning("Found block copyright comment but header already exists.", "Add to Javadoc or remove.", c.getRange().get());
 				}
 				if (c.isLineComment()) {
-					analysis.getWarnings().add(new Warning<>("Copyright declared as line comment.", "Copyrights declared inline are difficult to see and/or useless within the current context. Move to file header or if authoring method, add to javaDoc with the @author annotation.", c.getRange().get()));
+					analysis.addWarning("Copyright declared as line comment.",
+							"Copyrights declared inline are difficult to see and/or useless within the current context. Move to file header or if authoring method, add to javaDoc with the @author annotation.",
+							c.getRange().get());
 					inline++;
 				}
 				copyrightsFound++;
@@ -300,7 +302,7 @@ public class NumberOfComments implements ModuleInterface {
 			} else if (!err.isEmpty() && !j.getCategory().isWhitespace()) {
 				if (err.size() >= 2) {
 					inline += err.size();
-					fileReport.getWarnings().add(dequeToWarning(err, j.getRange().get()));
+					fileReport.addWarning( dequeToWarning(err, j.getRange().get()) );
 				} else {
 					err = new LinkedList<>();
 				}
@@ -309,7 +311,7 @@ public class NumberOfComments implements ModuleInterface {
 		}
 
 		if (fileReport.getWarnings().isEmpty()) 	fileReport.setOptimalValue(1);
-		else 								fileReport.setOptimalValue(1 - (inline / (double) totalCom));
+		else 								        fileReport.setOptimalValue(1 - (inline / (double) totalCom));
 		return fileReport;
 	}
 
