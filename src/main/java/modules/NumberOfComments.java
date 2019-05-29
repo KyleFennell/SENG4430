@@ -11,10 +11,11 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.utils.SourceRoot;
 import com.mitchtalmadge.asciidata.table.ASCIITable;
 import com.mitchtalmadge.asciidata.table.formats.ASCIITableFormat;
+import modules.helpers.Analysis;
+import modules.helpers.FileReport;
 import modules.helpers.Warning;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -88,12 +89,12 @@ public class NumberOfComments implements ModuleInterface {
 
 		for (int i = 0; i < res.size(); i++) {
 			FileReport f = res.get(i);
-			String[] row = new String[f.analyses.length+1];
-			row[0] = f.fileName;
+			String[] row = new String[f.getAnalyses().length+1];
+			row[0] = f.getFileName();
 
 			// Collecting each file's analysis result. i.e. 'to-do, copyright, l_commentSeg'
-			for (int j = 0; j < f.analyses.length; j++) {
-				row[j+1] = String.format("%.2f", (f.analyses[j].optimalValue));
+			for (int j = 0; j < f.getAnalyses().length; j++) {
+				row[j+1] = String.format("%.2f", (f.getAnalyses()[j].getOptimalValue()));
 			}
 			data[i] = row; // Add row to table
 		}
@@ -112,12 +113,12 @@ public class NumberOfComments implements ModuleInterface {
 	 */
 	private FileReport analyse(CompilationUnit unit) {
 		FileReport fileReport = new FileReport(unit.getPrimaryTypeName().get(), unit.getStorage().get().getPath());
-		fileReport.analyses = new Analysis[] {
+		fileReport.setAnalyses(new Analysis[] {
 				analyseTodo(unit),
 				analyseCopyright(unit),
 				analyseLineCommentSegmentation(unit),
 				analyseJavadoc(unit)
-		};
+		});
 		return fileReport;
 	}
 
@@ -140,14 +141,14 @@ public class NumberOfComments implements ModuleInterface {
 			NameExpr key = entry.getKey();
 			Boolean value = entry.getValue();
 			if (value) methodsConforming++;
-			else fileAnal.warnings.add(new Warning<>(
+			else fileAnal.getWarnings().add(new Warning<>(
 					"No Javadoc associated with " + unit.getStorage().get().getFileName() + "::"+ key.getNameAsString(),
 					"Add Javadoc or move if whitespace exists between method.",
 					key.getRange().get()));
 		}
 
 		if (!methodDocMap.isEmpty())
-			fileAnal.optimalValue = (double) methodsConforming / methodDocMap.size();
+			fileAnal.setOptimalValue((double) methodsConforming / methodDocMap.size());
 		return fileAnal;
 	}
 	private static class MethodNameCollector extends VoidVisitorAdapter<Map<NameExpr, Boolean>> {
@@ -180,12 +181,12 @@ public class NumberOfComments implements ModuleInterface {
 		for (Comment c : unit.getAllContainedComments()) {
 			if (criteria.stream().anyMatch(c.getContent().toLowerCase()::contains)) {
 				todoFound++;
-				analysis.warnings.add(new Warning<>("TODO found.", "Implement or remove TODO.", c.getRange().get()));
+				analysis.getWarnings().add(new Warning<>("TODO found.", "Implement or remove TODO.", c.getRange().get()));
 			}
 		}
 
-		if (todoFound == 0) 	analysis.optimalValue = 1;
-		else 					analysis.optimalValue = 0.5 * (0.5 / todoFound);
+		if (todoFound == 0) 	analysis.setOptimalValue(1);
+		else 					analysis.setOptimalValue(0.5 * (0.5 / todoFound));
 
 		// Scope creep
 		// analysis.addVariable("todoFound", todoFound);
@@ -225,10 +226,10 @@ public class NumberOfComments implements ModuleInterface {
 						headerIsCorrectType = true;
 					}
 				} else {
-					analysis.warnings.add(new Warning<>("Found block copyright comment but header already exists.", "Add to Javadoc or remove.", c.getRange().get()));
+					analysis.getWarnings().add(new Warning<>("Found block copyright comment but header already exists.", "Add to Javadoc or remove.", c.getRange().get()));
 				}
 				if (c.isLineComment()) {
-					analysis.warnings.add(new Warning<>("Copyright declared as line comment.", "Copyrights declared inline are difficult to see and/or useless within the current context. Move to file header or if authoring method, add to javaDoc with the @author annotation.", c.getRange().get()));
+					analysis.getWarnings().add(new Warning<>("Copyright declared as line comment.", "Copyrights declared inline are difficult to see and/or useless within the current context. Move to file header or if authoring method, add to javaDoc with the @author annotation.", c.getRange().get()));
 					inline++;
 				}
 				copyrightsFound++;
@@ -241,7 +242,7 @@ public class NumberOfComments implements ModuleInterface {
 		if (inline != 0) 			weight *= 1 - (inline / (double) copyrightsFound);
 		if (copyrightsFound > 1) 	weight *= 1 - copyrightsFound/(double)comments;
 
-		analysis.optimalValue = weight;
+		analysis.setOptimalValue(weight);
 		return analysis;
 	}
 
@@ -299,7 +300,7 @@ public class NumberOfComments implements ModuleInterface {
 			} else if (!err.isEmpty() && !j.getCategory().isWhitespace()) {
 				if (err.size() >= 2) {
 					inline += err.size();
-					fileReport.warnings.add(dequeToWarning(err, j.getRange().get()));
+					fileReport.getWarnings().add(dequeToWarning(err, j.getRange().get()));
 				} else {
 					err = new LinkedList<>();
 				}
@@ -307,8 +308,8 @@ public class NumberOfComments implements ModuleInterface {
 			j = j.getNextToken().get();
 		}
 
-		if (fileReport.warnings.isEmpty()) 	fileReport.optimalValue = 1;
-		else 								fileReport.optimalValue = 1 - (inline / (double) totalCom);
+		if (fileReport.getWarnings().isEmpty()) 	fileReport.setOptimalValue(1);
+		else 								fileReport.setOptimalValue(1 - (inline / (double) totalCom));
 		return fileReport;
 	}
 
@@ -336,47 +337,5 @@ public class NumberOfComments implements ModuleInterface {
 		return new Warning<>(og.toString(), fo.toString(), range);
 	}
 
-
-
-	private class FileReport {
-		private final String fileName;
-		private final Path fileLocation;
-		private Analysis[] analyses;
-
-		FileReport(String fileName, Path filePath) {
-			this.fileName = fileName;
-			this.fileLocation = filePath;
-		}
-	}
-
-
-	private class Analysis {
-		private List<Warning> warnings;
-		private double optimalValue;
-
-		Analysis() {
-			warnings = new ArrayList<>();
-		}
-
-		String asPercentage() {
-			return String.format("%.2f", optimalValue*100) + "%";
-		}
-
-		String printWarnings() {
-			if (!warnings.isEmpty()) {
-				String[] headers = { "Line", "Cause", "Fix" };
-				String[][] data = new String[warnings.size()][];
-
-				for (int i = 0; i < warnings.size(); i++) {
-					Warning w = warnings.get(i);
-					String[] row = { String.valueOf(w.lineOrigin.begin.line), w.cause.toString(), w.recommendedFix.toString() };
-					data[i] = row;
-				}
-
-				return ASCIITable.fromData(headers, data).withTableFormat(new ASCIITableFormat()).toString();
-			}
-			return null;
-		}
-	}
 
 }
