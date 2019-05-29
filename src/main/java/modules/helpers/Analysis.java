@@ -7,6 +7,13 @@ import com.mitchtalmadge.asciidata.table.formats.ASCIITableFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Project          :   Software Quality Assignment
+ * Class name       :   Analysis.java
+ * Author(s)        :   John Barr
+ * Date Created     :   23/05/19
+ * Purpose          :   This class again is a Wrapper for storing Warnings and the result after an Analysis is done.
+ */
 public class Analysis {
 	private List<Warning> warnings;
 	private double optimalValue;

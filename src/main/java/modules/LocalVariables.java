@@ -18,6 +18,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Project          :   Software Quality Assignment
+ * Class name       :   LocalVariables.java
+ * Author(s)        :   John Barr
+ * Date Created     :   22/05/19
+ * Purpose          :   This class is used to analyse certain properties of local variables within a project.
+ *                      Based on the results of each analysis, warnings will be served and solutions to mitigate
+ *                      said warnings will be recommended.
+ */
 public class LocalVariables implements ModuleInterface {
 
 	@Override

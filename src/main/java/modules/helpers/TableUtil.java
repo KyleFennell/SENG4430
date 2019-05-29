@@ -5,6 +5,13 @@ import com.mitchtalmadge.asciidata.table.formats.ASCIITableFormat;
 
 import java.util.List;
 
+/**
+ * Project          :   Software Quality Assignment
+ * Class name       :   TableUtil.java
+ * Author(s)        :   John Barr
+ * Date Created     :   29/05/19
+ * Purpose          :   A utility class that helps with outputting data from Analysis in a tabular fashion.
+ */
 public class TableUtil {
 
 	private TableUtil() { throw new IllegalStateException("Utility class"); }

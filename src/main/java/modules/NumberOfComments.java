@@ -20,7 +20,17 @@ import java.util.*;
 
 import static com.github.javaparser.GeneratedJavaParserConstants.SINGLE_LINE_COMMENT;
 
-
+/**
+ * Project          :   Software Quality Assignment
+ * Class name       :   NumberOfComments.java
+ * Author(s)        :   John Barr
+ * Date Created     :   2/05/19
+ * Purpose          :   This class is used to analyse sub-classes of comments within a project.
+ *                      Based on the results of each analysis, warnings will be served and solutions to mitigate
+ *                      said warnings will be recommended. Due to the lack of a specifications when it comes to
+ *                      comments, this module is more about conforming to one consistent style rather than following
+ *                      a correct standard.
+ */
 public class NumberOfComments implements ModuleInterface {
 	private static final String ANALYSIS_ROOT = "resources/Example2";
 
