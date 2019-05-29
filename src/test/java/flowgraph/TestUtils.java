@@ -21,14 +21,6 @@ public class TestUtils {
     private static final String DIR = "src/test/resources/flowgraph/graphs/";
     private static final JavaParser PARSER = new JavaParser();
     
-    /**
-     * collection of all strings to test with their corresponding graph
-     */
-    protected static final Map<String, String> MAPPER = Map.ofEntries(
-        entry("", "b"),
-        entry("c", "d")
-    );
-    
     public static void compareGraphs(FlowGraph graph, FlowGraph result){
         assertAll("comparing Graphs",
                 () -> assertEquals(graph.getNodeCount(), result.getNodeCount()),

@@ -286,13 +286,24 @@ public class ConsoleInterface{
                 System.out.println("\nDisplay more advanced analysis? (Y/n)");
                 String choice = new Scanner(System.in).nextLine().toLowerCase();
 
-                if (choice.equals("y")) {
+                if (!choice.equals("n") && !choice.equals("N")) {
                     for (String metric : allMetrics) {
                         System.out.println("-------------------------------------------------------------");
                         System.out.println(metric);
                     }
                 }
 
+                return "";
+            }
+        });
+        
+        m_commands.add(new Command(
+                "reload settings",
+                "reload the configurations given by the configuration file",
+                "<>"){
+            @Override
+            public String execute(String[] args){
+                ModuleManager.reloadSettings();
                 return "";
             }
         });

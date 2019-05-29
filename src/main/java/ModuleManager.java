@@ -151,4 +151,12 @@ public class ModuleManager {
         Logger.warning("module " + m + " not loaded");
         return false;
     }
+    
+    /** Reloads the configuration file
+     *
+     * @return true, if reload was successful
+     */
+    public static boolean reloadSettings(){
+        return ADJUSTMENTS.reloadSettings();
+    }
 }

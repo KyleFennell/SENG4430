@@ -22,17 +22,28 @@ public class Adjustment{
     private Adjustment(String moduleIdentifier){
         this.moduleIdentifier = moduleIdentifier;
         props = new ExtendedProperties();
-        try{
-            InputStream input = getClass().getResourceAsStream("/config.properties");
-            props.load(input);
-        }catch(IOException exception){
-            utils.Logger.warning("The configuration file could not be read!");
-        }
+        loadSettings();
     }
     
     private Adjustment(ExtendedProperties props, String moduleIdentifier){
         this.props = props;
         this.moduleIdentifier = moduleIdentifier;
+    }
+    
+    private boolean loadSettings(){
+        try{
+            InputStream input = getClass().getResourceAsStream("/config.properties");
+            props.load(input);
+        }catch(IOException exception){
+            utils.Logger.warning("The configuration file could not be read!");
+            return false;
+        }
+        return true;
+    }
+    
+    public boolean reloadSettings(){
+        props.clear();
+        return loadSettings();
     }
     
     /** Creates an Adjustment which can access the settings of a module.
