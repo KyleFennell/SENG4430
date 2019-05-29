@@ -5,8 +5,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Project          : Software Quality Assignment
+ * Class name       : Util
+ * Author(s)        : Kyle Fennell
+ * Purpose          : collection of static methods used by fanin and fanout
+ */
+
 public class Util {
 
+    /**
+     * @param value the value being searched for
+     * @param map the map to search
+     * @param <K> type of the key of the map
+     * @param <V> type of the value of the map
+     * @return a list<K> that contains all the keys that
+     *      had a value matching the 'value' param.
+     */
     public static <K, V> List<K> getKeysFromValue(V value, Map<K, V> map){
         List<K> keys = new ArrayList<>();
         for (K s : map.keySet()){
@@ -17,6 +32,11 @@ public class Util {
         return keys;
     }
 
+    /**
+     * @param map the mep to calculate statistics from
+     * @return strings for the max, min, mean, and mode values of the map
+     *  and the keys that share those values
+     */
     public static String[] calculateBasicMetrics(Map<String, Integer> map){
         int max = 0;
         int total = 0;
@@ -38,6 +58,10 @@ public class Util {
         };
     }
 
+    /**
+     * @param map the map to calculate the mode for
+     * @return the mode value from the map.
+     */
     public static int calculateMode(Map<String, Integer> map){
         Map<Integer, Integer> modeHelper = new HashMap<>();
 
