@@ -32,7 +32,6 @@
                 <version>2.22.0</version>
                 <configuration>
                     <argLine>
-                        --illegal-access=permit
                     </argLine>
                     <argLine>-Dfile.encoding=UTF-8</argLine>
                 </configuration>
@@ -43,7 +42,6 @@
                 <version>2.22.0</version>
                 <configuration>
                     <argLine>
-                        --illegal-access=permit
                     </argLine>
                 </configuration>
             </plugin>

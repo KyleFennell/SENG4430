@@ -9,7 +9,8 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.stmt.Statement;
 import java.util.Map;
-import static java.util.Map.entry;
+
+import static java.util.Map.Entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -24,10 +25,10 @@ public class TestUtils {
     /**
      * collection of all strings to test with their corresponding graph
      */
-    protected static final Map<String, String> MAPPER = Map.ofEntries(
-        entry("", "b"),
-        entry("c", "d")
-    );
+    protected static final Map<String, String> MAPPER = null;// = Map.ofEntries(
+    //    entry("", "b"),
+    //    entry("c", "d")
+    //);
     
     public static void compareGraphs(FlowGraph graph, FlowGraph result){
         assertAll("comparing Graphs",
