@@ -1,10 +1,7 @@
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
-import modules.AverageLengthOfIdentifier;
-import modules.LengthOfCode;
-import modules.LengthOfConditionalBlocks;
-import modules.ModuleInterface;
+import modules.*;
 import utils.Logger;
 
 import java.io.IOException;
@@ -70,6 +67,7 @@ public class ConsoleInterface{
         ModuleManager.registerModule(new CyclomaticComplexity());
         ModuleManager.registerModule(new NumberOfPaths());
         ModuleManager.registerModule(new AverageLengthOfIdentifier());
+        ModuleManager.registerModule(new UnmeetableCode());
     }
 
     /**
@@ -298,7 +296,7 @@ public class ConsoleInterface{
                 return "";
             }
         });
-        
+
         m_commands.add(new Command(
                 "reload settings",
                 "reload the configurations given by the configuration file",
