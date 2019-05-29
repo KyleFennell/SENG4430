@@ -15,8 +15,8 @@ public class ModuleFanOutTests {
         FanOut fanOut = new FanOut();
         String[] results = fanOut.executeModule(sourceRoot);
         for (String s : results){
-            System.out.println(s);
+            //System.out.println(s);
         }
-        System.out.println(fanOut.printMetrics());
+        //System.out.println(fanOut.printMetrics());
     }
 }

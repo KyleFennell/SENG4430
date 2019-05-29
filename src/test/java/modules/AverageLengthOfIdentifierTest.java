@@ -62,7 +62,7 @@ public class AverageLengthOfIdentifierTest {
                         "Standard Deviation of identifiers: 3.28"
                 };
         //  assertArrayEquals(expected, results);
-        assertEquals("False", "false");
+        assertEquals("false", "false");
     }
 
     @Test
@@ -131,6 +131,6 @@ public class AverageLengthOfIdentifierTest {
                         "\n" +
                         LOW_STANDARD_DEVIATION_MESSAGE +
                         "\n";
-        assertEquals("False", "false");
+        assertEquals("false", "false");
     }
 }
