@@ -11,6 +11,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Project          : Software Quality Assignment
+ * Class name       : StringMatchFanOut
+ * Author(s)        : Kyle Fennell
+ * Purpose          : This was made in compensation for FanIn being broken
+ *                      It lists the number of times each unique method name is called
+ *                      giving an idea about what kind of functions are used most
+ *                      in a program.
+ *                      Class1.get() and Class2.get() will result in - get: 2.
+ */
+
 public class StringMatchFanIn implements ModuleInterface{
 
     private Map<String, Integer> uniqueFanIn = new HashMap<>();
@@ -70,7 +81,10 @@ public class StringMatchFanIn implements ModuleInterface{
     @Override
     public String getDescription() {
 
-        return "";
+        return "Counts every method call by name. Does not take into account the class " +
+                "this method belongs to. i.e. class1.get() == class2.get() in terms of " +
+                "counting. This metric shows the 'kinds' of methods that are used most in " +
+                "the program.";
     }
 
     @Override

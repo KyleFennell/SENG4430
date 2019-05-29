@@ -1,26 +1,29 @@
 package modules;
 
-import flowgraph.CyclicFlowGraphBuilder;
+import flowgraph.AcyclicFlowGraphBuilder;
 import flowgraph.FlowGraph;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Project          : Software Quality Assignment 1
- * Class name       : CyclomaticComplexity
+ * Class name       : NumberOfPaths
  * @author(s)       : Nicolas Klenert
  * Date             : 14/05/19
- * Purpose          : Module to calculate the Cyclomatic Complexity of java code.
+ * Purpose          : Module to calculate the number of different paths of a FlowGraph.
+ * 
+ * This module can be used to estimate how many test are needed to fully test the behaviour of a method.
+ * Different paths on FlowGraph are paths, which have at least one not in common with each other.
  */
-public class CyclomaticComplexity extends FlowGraphNumberExtractor {
+public class NumberOfPaths extends FlowGraphNumberExtractor {
         
-    public CyclomaticComplexity(){
-        super(new CyclicFlowGraphBuilder());
+    public NumberOfPaths(){
+        super(new AcyclicFlowGraphBuilder());
     }
     
     @Override
     public String getName() {
-        return "CyclomaticComplexity";
+        return "NumberOfPaths";
     }
 
     /**
@@ -43,12 +46,13 @@ public class CyclomaticComplexity extends FlowGraphNumberExtractor {
 
     @Override
     protected int getFlowGraphNumber(FlowGraph graph) {
-        return graph.getCyclomaticComplexity();
+        return graph.getNumberOfPaths();
     }
 
     @Override
     protected String getNameOfNumber() {
-        return "Cyclomatic Complexity";
+        return "Number of Paths";
     }   
    
 }
+

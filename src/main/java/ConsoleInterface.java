@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import modules.CyclomaticComplexity;
+import modules.NumberOfPaths;
 
 /**
  * Project          : Software Quality Assignment 1
@@ -62,6 +64,7 @@ public class ConsoleInterface{
         ModuleManager.registerModule(new LengthOfCode());
         ModuleManager.registerModule(new LengthOfConditionalBlocks());
         ModuleManager.registerModule(new CyclomaticComplexity());
+        ModuleManager.registerModule(new NumberOfPaths());
         ModuleManager.registerModule(new AverageLengthOfIdentifier());
         ModuleManager.registerModule(new UnmeetableCode());
         ModuleManager.registerModule(new FogIndex());
@@ -291,6 +294,17 @@ public class ConsoleInterface{
                     }
                 }
 
+                return "";
+            }
+        });
+
+        m_commands.add(new Command(
+                "reload settings",
+                "reload the configurations given by the configuration file",
+                "<>"){
+            @Override
+            public String execute(String[] args){
+                ModuleManager.reloadSettings();
                 return "";
             }
         });

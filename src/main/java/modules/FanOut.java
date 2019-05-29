@@ -13,6 +13,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Project          : Software Quality Assignment
+ * Class name       : FanOut
+ * Author(s)        : Kyle Fennell
+ * Purpose          : This class calculates the fan outs of all methods
+ *                      declared in the project. Total Fan Out is the sum
+ *                      of all method calls and Unique Fan Out is the sum
+ *                      of unique methods called.
+ */
+
 public class FanOut implements ModuleInterface{
 
     private Map<String, Map<String, Integer>> collatedTotalFanOut = new HashMap<>();
@@ -87,6 +97,11 @@ public class FanOut implements ModuleInterface{
         return output;
     }
 
+    /**
+     * @param arr1 the first array
+     * @param arr2 the second array
+     * @return the first array concatenated with the second array
+     */
     private String[] concatArrays(String[] arr1, String[] arr2){
         String[] out = new String[arr1.length + arr2.length];
         for (int i = 0; i < arr1.length; i++){
@@ -98,6 +113,10 @@ public class FanOut implements ModuleInterface{
         return out;
     }
 
+    /** takes a 2 deep map and flattens it to a 1 deep map
+     * @param map the map to flatten
+     * @return a map whos entries are ("parentMapKey_childMapKey", childMapVal)
+     */
     private Map<String, Integer> flattenMap(Map<String, Map<String, Integer>> map){
         Map<String, Integer> out = new HashMap<>();
         for (String file : map.keySet()){
