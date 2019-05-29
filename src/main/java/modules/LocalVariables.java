@@ -12,10 +12,7 @@ import modules.helpers.FileReport;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class LocalVariables implements ModuleInterface {
 
@@ -83,6 +80,31 @@ public class LocalVariables implements ModuleInterface {
 		return fileAnal;
 	}
 
+	private Analysis findMultipleRandomObjects(Map<String, List<VariableDeclarationExpr>> methodVariableMap) {
+		Analysis fileAnal = new Analysis();
+		fileAnal.setOptimalValue(1); // Begin by assuming no duplicate Random objects exist within the file
+
+		for (Map.Entry<String, List<VariableDeclarationExpr>> entry : methodVariableMap.entrySet()) {
+			String k = entry.getKey();
+			List<VariableDeclarationExpr> v = entry.getValue();
+			List<VariableDeclarationExpr> errRand = new ArrayList<>();
+
+			for (VariableDeclarationExpr expr : v) {
+				for (VariableDeclarator var : expr.getVariables()) {
+					if (var.getTypeAsString().equals("Random")) // TODO find if there is a direct method of comparing 2 objects.
+						errRand.add(expr);
+				}
+				if (errRand.size() > 1) {
+					fileAnal.addWarning("Multiple Random objects within same scope.",
+					                                            "Create a single Random object and re-use it to enable better efficiency and bug prevention.",
+					                                            errRand.get(0).getRange().get()
+					                                           );
+					fileAnal.setOptimalValue(0);
+				}
+			}
+		}
+		return fileAnal;
+	}
 
 
 	private Map<String, List<VariableDeclarationExpr>> getMethodVariableMap(CompilationUnit unit) {
