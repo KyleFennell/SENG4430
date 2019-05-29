@@ -18,7 +18,7 @@ public class UnmeetableCodeTest {
 
     @BeforeAll
     public static void setUpClass() throws Exception {
-        sourceRoot = new SourceRoot(Paths.get("src\\main\\java"));
+        sourceRoot = new SourceRoot(Paths.get("test-projects\\Java-Static-Analyzer\\src\\main\\java"));
         sourceRoot.tryToParse();
     }
 
