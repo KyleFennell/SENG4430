@@ -7,10 +7,15 @@ import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.visitor.VoidVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.utils.SourceRoot;
+import modules.helpers.Analysis;
+import modules.helpers.FileReport;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class LocalVariables implements ModuleInterface {
 
@@ -37,6 +42,9 @@ public class LocalVariables implements ModuleInterface {
 	}
 	@Override
 	public String[] executeModule(SourceRoot sourceRoot) {
+
+		List<FileReport> results = new ArrayList<>();
+
 		try {
 			sourceRoot.tryToParse();
 			for (CompilationUnit unit : sourceRoot.getCompilationUnits()) {
@@ -48,6 +56,33 @@ public class LocalVariables implements ModuleInterface {
 		}
 		return new String[0];
 	}
+
+
+	private Analysis findSameLineVariables(Map<String, List<VariableDeclarationExpr>> methodVariableMap) {
+		Analysis fileAnal = new Analysis();
+		int totalVariables = 0;
+		int erroneousVariables = 0;
+
+		for (Map.Entry<String, List<VariableDeclarationExpr>> entry : methodVariableMap.entrySet()) {
+			String k = entry.getKey();
+			List<VariableDeclarationExpr> v = entry.getValue();
+
+			for (VariableDeclarationExpr expr : v) {
+				if (expr.getVariables().size() > 1) {
+					fileAnal.addWarning(
+							k + "(): " + expr,
+							"Multiple variables declared on one line are difficult to read; Refactor.",
+							v.get(0).getRange().get());
+					erroneousVariables += expr.getVariables().size();
+				}
+				totalVariables++;
+			}
+		}
+
+		if (totalVariables != 0) fileAnal.setOptimalValue(1 - ((double) erroneousVariables / totalVariables));
+		return fileAnal;
+	}
+
 
 
 	private Map<String, List<VariableDeclarationExpr>> getMethodVariableMap(CompilationUnit unit) {
