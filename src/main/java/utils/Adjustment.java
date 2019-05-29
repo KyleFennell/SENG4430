@@ -31,8 +31,8 @@ public class Adjustment{
     }
     
     private boolean loadSettings(){
-        try{
-            InputStream input = getClass().getResourceAsStream("/config.properties");
+        //inputStream is closed after the try statement 
+        try (InputStream input = getClass().getResourceAsStream("/config.properties")) {
             props.load(input);
         }catch(IOException exception){
             utils.Logger.warning("The configuration file could not be read!");
