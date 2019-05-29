@@ -70,7 +70,7 @@ public class FanIn implements ModuleInterface{
                     String callItendifier = c.getNameAsString();
                     if (!uniqueCalls.contains(callItendifier)){
                         uniqueCalls.add(callItendifier);
-                        Logger.log("UNIQUE CALL IDENTIFIER: " + callItendifier);
+                        Logger.debug("UNIQUE CALL IDENTIFIER: " + callItendifier);
                     }
                 }
 
