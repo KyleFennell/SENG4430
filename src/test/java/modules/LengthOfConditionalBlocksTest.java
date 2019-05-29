@@ -2,12 +2,13 @@ package modules;
 
 import com.github.javaparser.utils.SourceRoot;
 import java.nio.file.Paths;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -17,8 +18,7 @@ import org.junit.jupiter.api.Test;
  * Date Created     : 15/05/19
  * Purpose          : This class is used to test the LengthOfConditionalBlocks module
  */
-@Disabled //disable class as long as the SourceRoot is not relative
-public class LengthOfConditionalBlocksTest {
+class LengthOfConditionalBlocksTest {
 
     private LengthOfConditionalBlocks locb;
     private static SourceRoot sourceRoot;
@@ -26,26 +26,28 @@ public class LengthOfConditionalBlocksTest {
     private static SourceRoot sourceRoot2;
 
     @BeforeAll
-    public static void setUpClass() throws Exception {
-        sourceRoot = new SourceRoot(Paths.get("C:\\dev\\java\\Java-Static-Analyzer\\src\\main\\java"));
+    static void setUpClass() throws Exception {
+        sourceRoot = new SourceRoot(Paths.get("test-projects\\Java-Static-Analyzer\\src\\main\\java"));
         sourceRoot.tryToParse();
+
+        // For use on project completion
         sourceRoot2 = new SourceRoot(Paths.get("src\\main\\java"));
         sourceRoot2.tryToParse();
     }
 
     @BeforeEach
-    public void setUpMethod() {
+    void setUpMethod() {
         locb = new LengthOfConditionalBlocks();
         locb2 = new LengthOfConditionalBlocks();
     }
 
     @Test
-    public void getName() {
+    void getName() {
         assertEquals(locb.getName(), "LengthOfConditionalBlocks");
     }
 
     @Test
-    public void executeModule() {
+    void executeModule() {
         String[] results = locb.executeModule(sourceRoot);
         String[] expected = new String[] {
             "LengthOfConditionalBlocks",
@@ -58,8 +60,9 @@ public class LengthOfConditionalBlocksTest {
         assertArrayEquals(expected, results);
     }
 
+    @Disabled("Tests the current project files. Requires project completion")
     @Test
-    public void executeModule2() {
+    void executeModule2() {
         String[] results = locb2.executeModule(sourceRoot2);
         String[] expected = new String[] {
             "LengthOfConditionalBlocks",
@@ -73,7 +76,7 @@ public class LengthOfConditionalBlocksTest {
     }
 
     @Test
-    public void getDescription() {
+    void getDescription() {
         String description = "This is a measure of the size of conditional blocks in" +
                 " the program. Generally, the larger the size of a block, the more" +
                 " complex and error-prone that block is likely to be.";
@@ -81,15 +84,23 @@ public class LengthOfConditionalBlocksTest {
     }
 
     @Test
-    public void printMetrics() {
+    void printMetrics() {
         locb.executeModule(sourceRoot);
-        String expected = "C:\\dev\\java\\Java-Static-Analyzer\\src\\main\\java\\analyzer\\visitors\\MetricVisitor.java; Line 22: 11 lines. [Block larger than 10, may need reviewing]\r\n" +
-                "C:\\dev\\java\\Java-Static-Analyzer\\src\\main\\java\\analyzer\\visitors\\VariableNamingConventionVisitor.java; Line 90: 11 lines. [Block larger than 10, may need reviewing]\r\n";
-        assertEquals(expected, locb.printMetrics());
+        String[] expected = {
+                "analyzer\\visitors\\MetricVisitor.java; Line 22: 11 lines. [Block larger than 10, may need reviewing]",
+                "analyzer\\visitors\\VariableNamingConventionVisitor.java; Line 90: 11 lines. [Block larger than 10, may need reviewing]"
+        };
+        String actual = locb.printMetrics();
+
+        assertFalse(actual.isEmpty());
+        for (String str : expected) {
+            assertTrue(actual.contains(str));
+        }
     }
 
+    @Disabled("Tests the current project files. Requires project completion")
     @Test
-    public void printMetrics2() {
+    void printMetrics2() {
         locb2.executeModule(sourceRoot2);
         String expected = "";
         assertEquals(expected, locb.printMetrics());
