@@ -13,6 +13,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Project          : Software Quality Assignment
+ * Class name       : FanOut
+ * Author(s)        : Kyle Fennell
+ * Purpose          : This module currently is not possible with JavaParser
+ *                      due to this issue: https://github.com/javaparser/javaparser/issues/1959
+ */
 
 public class FanIn implements ModuleInterface{
 
@@ -74,7 +81,7 @@ public class FanIn implements ModuleInterface{
 
     @Override
     public String getDescription() {
-        return "";
+        return "Module implementation impossible with current version of JavaParser.";
     }
 
     @Override
