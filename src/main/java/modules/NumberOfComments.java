@@ -9,10 +9,9 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.visitor.VoidVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.utils.SourceRoot;
-import com.mitchtalmadge.asciidata.table.ASCIITable;
-import com.mitchtalmadge.asciidata.table.formats.ASCIITableFormat;
 import modules.helpers.Analysis;
 import modules.helpers.FileReport;
+import modules.helpers.TableUtil;
 import modules.helpers.Warning;
 
 import java.io.IOException;
@@ -23,16 +22,10 @@ import static com.github.javaparser.GeneratedJavaParserConstants.SINGLE_LINE_COM
 
 
 public class NumberOfComments implements ModuleInterface {
-
 	private static final String ANALYSIS_ROOT = "resources/Example2";
-	private List<FileReport> results;
-
 
 	@Override
-	public String getName() {
-		return "NumberOfComments";
-	}
-
+	public String getName() { return "NumberOfComments"; }
 
 	@Override
 	public String getDescription() {
@@ -44,6 +37,14 @@ public class NumberOfComments implements ModuleInterface {
 					   "return a single optimal value";
 	}
 
+	@Override
+	public String printMetrics() { return null; }
+
+	private void printMetricsTable(List<FileReport> res) {
+		String[] headers = { "Class Name", "todo", "copyright", "l_commentSeg", "javadoc" };
+		System.out.println(TableUtil.fileReportsToTable(res, headers));
+	}
+
 
 	String[] executeModule() {
 		SourceRoot sourceRoot = new SourceRoot(Paths.get(ANALYSIS_ROOT));
@@ -51,55 +52,18 @@ public class NumberOfComments implements ModuleInterface {
 	}
 	@Override
 	public String[] executeModule(SourceRoot sourceRoot) {
+		List<FileReport> results = new ArrayList<>();
 		try {
 			sourceRoot.tryToParse();
-			results = new ArrayList<>();
 			for (CompilationUnit unit : sourceRoot.getCompilationUnits())
 				results.add(analyse(unit));
-			System.out.println(printMetricsTable(results));
+			printMetricsTable(results);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return new String[] { printMetricsTable(results) };
+		return new String[0];
 	}
 
-
-	@Override
-	public String printMetrics() {
-		return printMetricsTable(results);
-	}
-
-
-	/**
-	 * Using the library ASCIITable, developed by Mitch Talmadge, this function will output the following in tabular form:
-	 * Each {@code Analysis} object in the parameter {@code List<FileReport>} will act a column header.
-	 * Each file that was analysed will be the row header containing each file's {@code optimalValue} between 0-1;
-	 * rounded to 2 decimal places.
-	 *
-	 * It should be noted that at this current point in time, each column header will need to be explicitly typed here.
-	 * Similarly,the {@code headers} size must match the size of each {@code res.analyses.length},
-	 * otherwise an Exception will be thrown by ASCIITable. TODO: Helper that does this automatically.
-	 *
-	 * @param res A List of FileReport objects that were analysed via the {@code analyse()} function.
-	 * @return The entire table containing analysis results as a String
-	 */
-	private String printMetricsTable(List<FileReport> res) {
-		String[] headers = { "Class Name", "todo", "copyright", "l_commentSeg", "javadoc"};
-		String[][] data = new String[res.size()][];
-
-		for (int i = 0; i < res.size(); i++) {
-			FileReport f = res.get(i);
-			String[] row = new String[f.getAnalyses().length+1];
-			row[0] = f.getFileName();
-
-			// Collecting each file's analysis result. i.e. 'to-do, copyright, l_commentSeg'
-			for (int j = 0; j < f.getAnalyses().length; j++) {
-				row[j+1] = String.format("%.2f", (f.getAnalyses()[j].getOptimalValue()));
-			}
-			data[i] = row; // Add row to table
-		}
-		return ASCIITable.fromData(headers, data).withTableFormat(new ASCIITableFormat()).toString();
-	}
 
 
 	/**

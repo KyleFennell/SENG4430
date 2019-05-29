@@ -9,45 +9,38 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.utils.SourceRoot;
 import modules.helpers.Analysis;
 import modules.helpers.FileReport;
+import modules.helpers.TableUtil;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class LocalVariables implements ModuleInterface {
 
 	@Override
-	public String getName() {
-		return "LocalVariables";
-	}
-
+	public String getName() { return "LocalVariables"; }
 	@Override
-	public String getDescription() {
-		return null;
-	}
-
+	public String getDescription() { return null; }
 	@Override
-	public String printMetrics() {
-		return null;
-	}
+	public String printMetrics() { return null; }
 
 	public String[] executeModule() {
 		final String ANALYSIS_ROOT = "resources/Example2";
 		SourceRoot sourceRoot = new SourceRoot(Paths.get(ANALYSIS_ROOT));
 		return executeModule(sourceRoot);
-
 	}
 	@Override
 	public String[] executeModule(SourceRoot sourceRoot) {
-
 		List<FileReport> results = new ArrayList<>();
-
 		try {
 			sourceRoot.tryToParse();
 			for (CompilationUnit unit : sourceRoot.getCompilationUnits()) {
-				System.out.println(unit.getPrimaryTypeName().get());
-				System.out.println(methodAndVariablesToString(getMethodVariableMap(unit)));
+				results.add(analyse(unit));
 			}
+			printMetricTable(results);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -55,8 +48,30 @@ public class LocalVariables implements ModuleInterface {
 	}
 
 
+
+	private FileReport analyse(CompilationUnit unit) {
+		FileReport fileReport = new FileReport(unit.getPrimaryTypeName().get(), unit.getStorage().get().getPath());
+		Map<String, List<VariableDeclarationExpr>> methodVariableMap = getMethodVariableMap(unit);
+
+		fileReport.setAnalyses(new Analysis[] {
+				findSameLineVariables(methodVariableMap),
+				findMultipleRandomObjects(methodVariableMap),
+		});
+		return fileReport;
+	}
+
+
+
+	private void printMetricTable(List<FileReport> results) {
+		String[] headers = { "Class Name", "same_line_vars", "multi_rand"};
+		System.out.println(TableUtil.fileReportsToTable(results, headers));
+	}
+
+
+
 	private Analysis findSameLineVariables(Map<String, List<VariableDeclarationExpr>> methodVariableMap) {
 		Analysis fileAnal = new Analysis();
+		fileAnal.setOptimalValue(1); // Begin by assuming no variables exists on the same line
 		int totalVariables = 0;
 		int erroneousVariables = 0;
 
@@ -79,6 +94,8 @@ public class LocalVariables implements ModuleInterface {
 		if (totalVariables != 0) fileAnal.setOptimalValue(1 - ((double) erroneousVariables / totalVariables));
 		return fileAnal;
 	}
+
+
 
 	private Analysis findMultipleRandomObjects(Map<String, List<VariableDeclarationExpr>> methodVariableMap) {
 		Analysis fileAnal = new Analysis();
@@ -105,6 +122,7 @@ public class LocalVariables implements ModuleInterface {
 		}
 		return fileAnal;
 	}
+
 
 
 	private Map<String, List<VariableDeclarationExpr>> getMethodVariableMap(CompilationUnit unit) {
@@ -151,6 +169,7 @@ public class LocalVariables implements ModuleInterface {
 			methodCollector.put(md.getNameAsString(), variablesFromMethod);
 		}
 	}
+
 
 
 	private static class MethodVariablesCollector extends VoidVisitorAdapter< List<VariableDeclarationExpr> > {
