@@ -64,6 +64,7 @@ public class ConsoleInterface{
         ModuleManager.registerModule(new CyclomaticComplexity());
         ModuleManager.registerModule(new AverageLengthOfIdentifier());
         ModuleManager.registerModule(new UnmeetableCode());
+        ModuleManager.registerModule(new FogIndex());
     }
 
     /**
