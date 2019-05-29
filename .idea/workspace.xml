@@ -3,20 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="5f7f05f8-e365-405c-a587-786efb246ab2" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ConsoleInterface.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ConsoleInterface.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/SENG4430.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/SENG4430.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ConsoleInterface$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ConsoleInterface$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ConsoleInterface$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ConsoleInterface$2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ConsoleInterface$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ConsoleInterface$3.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ConsoleInterface$4.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ConsoleInterface$4.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ConsoleInterface$5.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ConsoleInterface$5.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ConsoleInterface$6.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ConsoleInterface$6.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ConsoleInterface$7.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ConsoleInterface$7.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ConsoleInterface$Command.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ConsoleInterface$Command.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ConsoleInterface.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ConsoleInterface.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/ModuleManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ModuleManager.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/modules/FogIndex.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/modules/FogIndex.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/modules/LengthOfCode.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/modules/LengthOfCode.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/modules/FogIndex.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/modules/FogIndex.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/ConsoleInterface$8.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/SENG4430.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SENG4430.class" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -61,12 +50,12 @@
     <session id="-1226716236">
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="java" value="6201" />
+          <entry key="java" value="6360" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="JAVA" value="6200" />
+          <entry key="JAVA" value="6359" />
           <entry key="RegExp" value="1" />
         </counts>
       </usages-collector>
@@ -74,50 +63,42 @@
         <counts>
           <entry key="project.closed" value="4" />
           <entry key="project.open.time.11" value="1" />
+          <entry key="project.open.time.12" value="1" />
           <entry key="project.open.time.17" value="1" />
           <entry key="project.open.time.22" value="1" />
           <entry key="project.open.time.25" value="1" />
           <entry key="project.open.time.28" value="1" />
-          <entry key="project.opened" value="5" />
+          <entry key="project.opened" value="6" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="java" value="6" />
+          <entry key="java" value="7" />
           <entry key="xml" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="JAVA" value="6" />
+          <entry key="JAVA" value="7" />
           <entry key="XML" value="2" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.7734424">
+    <splitter split-orientation="horizontal" split-proportion="0.23455234">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file pinned="false" current-in-tab="false">
+          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/main/java/ConsoleInterface.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="350">
-                  <caret line="207" column="25" lean-forward="true" selection-start-line="207" selection-start-column="25" selection-end-line="207" selection-end-column="25" />
+                <state relative-caret-position="214">
+                  <caret line="280" column="61" selection-start-line="280" selection-start-column="55" selection-end-line="280" selection-end-column="61" />
                 </state>
               </provider>
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/src/main/java/modules/CyclomaticComplexity.java">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="136">
-                  <caret line="19" column="13" selection-start-line="19" selection-start-column="13" selection-end-line="19" selection-end-column="13" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/main/java/SENG4430.java">
               <provider selected="true" editor-type-id="text-editor">
                 <state>
@@ -130,13 +111,14 @@
       </split-first>
       <split-second>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file pinned="false" current-in-tab="false">
+          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/main/java/modules/FogIndex.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="187">
-                  <caret line="11" column="33" selection-start-line="11" selection-start-column="33" selection-end-line="11" selection-end-column="33" />
+                <state relative-caret-position="316">
+                  <caret line="95" column="60" lean-forward="true" selection-start-line="95" selection-start-column="60" selection-end-line="95" selection-end-column="60" />
                   <folding>
                     <element signature="n#!!doc" expanded="true" />
+                    <element signature="imports" expanded="true" />
                     <element signature="method#count#0;class#FogIndex#0" />
                     <element signature="method#getDescription#0;class#FogIndex#0" />
                   </folding>
@@ -144,11 +126,20 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/main/java/modules/FanIn.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-731">
+                <state relative-caret-position="17">
                   <caret line="2" column="10" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="10" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/src/main/java/modules/CyclomaticComplexity.java">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="-2092">
+                  <caret line="38" column="37" selection-start-line="38" selection-start-column="37" selection-end-line="38" selection-end-column="37" />
                 </state>
               </provider>
             </entry>
@@ -173,6 +164,10 @@
       <find>displa</find>
       <find>args</find>
       <find>load pat</find>
+      <find>load modules</find>
+      <find>,</find>
+      <find>it is</find>
+      <find>method</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -182,11 +177,11 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/src/main/java/ModuleManager.java" />
-        <option value="$PROJECT_DIR$/src/main/java/modules/FogIndex.java" />
         <option value="$PROJECT_DIR$/src/main/java/modules/LengthOfCode.java" />
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/main/java/ConsoleInterface.java" />
         <option value="$PROJECT_DIR$/src/main/java/SENG4430.java" />
+        <option value="$PROJECT_DIR$/src/main/java/modules/FogIndex.java" />
       </list>
     </option>
   </component>
@@ -297,7 +292,36 @@
     <frame x="-8" y="-8" width="1936" height="1096" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.15298508" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.15458423" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Image Layers" order="2" />
+      <window_info id="Designer" order="3" />
+      <window_info id="UI Designer" order="4" />
+      <window_info id="Capture Tool" order="5" />
+      <window_info id="Favorites" order="6" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3024948" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.45114344" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Terminal" order="7" weight="0.32952183" />
+      <window_info anchor="bottom" id="Event Log" order="8" side_tool="true" />
+      <window_info anchor="bottom" id="Version Control" order="9" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Messages" order="10" weight="0.32952183" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Palette" order="3" />
+      <window_info anchor="right" id="Capture Analysis" order="4" />
+      <window_info anchor="right" id="Theme Preview" order="5" />
+      <window_info anchor="right" x="0" y="0" width="434" height="856" id="Documentation" order="6" side_tool="true" weight="0.32995737" />
+      <window_info anchor="right" id="Palette&#9;" order="7" />
+      <window_info anchor="right" id="Maven Projects" order="8" />
+    </layout>
+    <layout-to-restore>
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.15458423" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -324,7 +348,7 @@
       <window_info anchor="right" x="0" y="0" width="434" height="856" id="Documentation" order="6" side_tool="true" weight="0.32995737" />
       <window_info anchor="right" id="Palette&#9;" order="7" />
       <window_info anchor="right" id="Maven Projects" order="8" />
-    </layout>
+    </layout-to-restore>
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
@@ -334,8 +358,8 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/ConsoleInterface.java</url>
-          <line>190</line>
-          <properties method="execute">
+          <line>191</line>
+          <properties>
             <option name="EMULATED" value="true" />
           </properties>
           <option name="timeStamp" value="11" />
@@ -344,13 +368,7 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/java/Logger.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="3" selection-start-column="3" selection-end-column="3" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/Logger.java" />
     <entry file="jar://C:/Program Files/Java/jdk1.8.0_191/jre/lib/rt.jar!/sun/nio/fs/WindowsPathParser.class">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1734">
@@ -407,25 +425,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/modules/FogIndex.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="11" column="33" selection-start-line="11" selection-start-column="33" selection-end-line="11" selection-end-column="33" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-            <element signature="method#count#0;class#FogIndex#0" />
-            <element signature="method#getDescription#0;class#FogIndex#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/modules/FanIn.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-731">
-          <caret line="2" column="10" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/modules/FanOut.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
@@ -433,24 +432,44 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/SENG4430.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="23" selection-start-column="23" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/modules/FanIn.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="2" column="10" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/modules/CyclomaticComplexity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="19" column="13" selection-start-line="19" selection-start-column="13" selection-end-line="19" selection-end-column="13" />
+        <state relative-caret-position="-2092">
+          <caret line="38" column="37" selection-start-line="38" selection-start-column="37" selection-end-line="38" selection-end-column="37" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/ConsoleInterface.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="350">
-          <caret line="207" column="25" lean-forward="true" selection-start-line="207" selection-start-column="25" selection-end-line="207" selection-end-column="25" />
+        <state relative-caret-position="214">
+          <caret line="280" column="61" selection-start-line="280" selection-start-column="55" selection-end-line="280" selection-end-column="61" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/SENG4430.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/modules/FogIndex.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="23" selection-start-column="23" selection-end-column="23" />
+        <state relative-caret-position="316">
+          <caret line="95" column="60" lean-forward="true" selection-start-line="95" selection-start-column="60" selection-end-line="95" selection-end-column="60" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+            <element signature="imports" expanded="true" />
+            <element signature="method#count#0;class#FogIndex#0" />
+            <element signature="method#getDescription#0;class#FogIndex#0" />
+          </folding>
         </state>
       </provider>
     </entry>

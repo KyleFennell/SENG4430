@@ -17,6 +17,7 @@ import java.util.List;
 public class FogIndex implements ModuleInterface
 {
     private String[] metrics = {""};
+    private String[] details = {""};
     @Override
     public String[] executeModule(SourceRoot sourceRoot)
     {
@@ -76,27 +77,27 @@ public class FogIndex implements ModuleInterface
                 fogIndexValue = 0.4 * (wordsPerSentence + complexWordRatio);
             }
         }
-        String results =    "Average complexity of the comments.\n" +
-                            "Fog index of comments: " + fogIndexValue + ".\n" +
-                            "There are " + numberOfWords + " words in the comments.\n" +
-                            numberComplexWords + " are complex words (made up of more than 3 syllables.\n" +
-                            "There are a total of " + numberOfSentences + "that make up the comments.\n";
+        details[0] =   "Average complexity of the comments.\n" +
+                    "Fog index of comments: " + fogIndexValue + ".\n" +
+                    "There are " + numberOfWords + " words in the comments.\n" +
+                    numberComplexWords + " are complex words (made up of more than 3 syllables.)\n" +
+                    "There are a total of " + numberOfSentences + " sentences that make up the comments.";
 
 
          String highIndex =  "A Fog index of over 10 indicates that the comments are complex in nature. " +
-                             "\nOne reason could be that the comments are attached to advanced control logic and a detailed explanation is required. "+
+                             "\nOne reason could be that the comments are attached to advanced control logic and a detailed explanation is required."+
                              "\nAnother reason could be that the method is being used to do too much at once." +
                              "Both of these could be resolved by refactoring some logic into a sub-method.";
          String lowIndex =  "A Fog index of 9 or lower indicates that the comments are simple in nature." +
-                            "\nThis can indicate that the method is fairly simple or coded in such a way that little explanation is required" +
-                            "\n It is also possible that the method has few comments. It is advisable to include comments to clarify complicated logic" +
+                            "\nThis can indicate that the methods are fairly simple or coded in such a way that little explanation is required" +
+                            "\nIt is also possible that the methods have few comments. It is advisable to include comments to clarify complicated logic" +
                             " or for justification of a portion of code.";
          String noWords =   "There were no words detected in the commented sections. This could indicate a trivial class. If the class is not trivial" +
                             "\nit may need to be reviewed.";
 
 
         String[] fogIndexSummary = new String[2];
-        fogIndexSummary[0] = "Fog Index value is: " + fogIndexValue + "\n";
+        fogIndexSummary[0] = "Fog Index value is: " + fogIndexValue;
         if(fogIndexValue >=10 && fogIndexValue < 20)
         {
             fogIndexSummary[1] = highIndex;
@@ -115,7 +116,7 @@ public class FogIndex implements ModuleInterface
         }
 
         metrics = fogIndexSummary;
-        return fogIndexSummary;
+        return details;
     }
 
     // Syllable counter was sourced from <https://gist.github.com/jbertouch/5f19ed775b5064b7a197cb2c9017ce52>
@@ -176,7 +177,7 @@ public class FogIndex implements ModuleInterface
             metrics[0] = "There was an running the Fog Index module";
             metrics[1] = "";
         }
-        return metrics[0].concat(metrics[1]);
+        return metrics[0].concat("\n" + metrics[1]);
     }
 
     @Override
