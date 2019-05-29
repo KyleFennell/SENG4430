@@ -1,0 +1,12 @@
+#two loops on same nodes -> paths: 5 (use none, use left, use right, use left - then right, use right - then left)
+* 1 5
+1 2
+2 3
+3 4
+4 5
+#first loop
+4 6
+6 2
+#second loop
+4 7
+7 2

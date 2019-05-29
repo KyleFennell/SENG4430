@@ -1,13 +1,14 @@
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.SourceRoot;
-import modules.FogIndex;
-import modules.LengthOfCode;
-import modules.ModuleInterface;
-
+import modules.*;
+import utils.Logger;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -15,7 +16,7 @@ import java.util.Scanner;
  * Project          : Software Quality Assignment 1
  * Class name       : ConsoleInterface
  * Author(s)        : Kyle Fennell
- * Contributor(s)   : Ben Collins
+ * Contributor(s)   : Ben Collins, Nicolas Klenert
  * Date             : 28/03/19
  * Purpose          : This is the interface between the terminal and the program.
  *      It is essentially a command line parser but also controls the flow of
@@ -56,13 +57,17 @@ public class ConsoleInterface{
     /**
      * Register all Modules available to the ModuleManager
      */
-    private void registerModules(){
+    private void registerModules() {
+        //TODO: Add all modules here
         ModuleManager.registerModule(new LengthOfCode());
-        ModuleManager.registerModule(new FogIndex());
+        ModuleManager.registerModule(new LengthOfConditionalBlocks());
+        ModuleManager.registerModule(new CyclomaticComplexity());
+        ModuleManager.registerModule(new AverageLengthOfIdentifier());
+        ModuleManager.registerModule(new UnmeetableCode());
     }
 
     /**
-     * @param command full string containing the command followed by the arguements
+     * @param command full string containing the command followed by the arguments
      * @return null on failure, "" on success
      */
     private String parseCommand(String command){
@@ -97,7 +102,7 @@ public class ConsoleInterface{
         return null;
     }
 
-    /** Lists all commands and their arguement format
+    /** Lists all commands and their argument format
      * @return string of all commands
      */
     private String listCommands(){
@@ -157,12 +162,13 @@ public class ConsoleInterface{
             @Override
             public String execute(String[] args) {
                 Logger.debug("Executing List command");
-                if (args.length > 2) {
-                    Logger.error("Command 'List' - Expects 1-2 argument.");
+                if (args.length < 1 || args.length > 2) {
+                    Logger.error("Command 'List' - Expects 1-2 argument. Received " + args.length);
                     return null;
                 }
+
                 switch(args[0].toLowerCase()) {
-                    case "module":
+                    case "modules":
                         System.out.println(ModuleManager.listModules());
                         return ModuleManager.listModules();
                     case "commands":
@@ -189,7 +195,17 @@ public class ConsoleInterface{
                     return null;
                 }
 
-                sourceRoot = new SourceRoot(Paths.get(args[0]));
+                Path sourcePath = Paths.get(args[0]);
+                if (!Files.isDirectory(sourcePath)) {
+                    Logger.error("Command 'Load' - Path entered is invalid. Only Directories are allowed");
+                    return null;
+                }
+
+                try{
+                    sourceRoot = new SourceRoot(sourcePath);
+                }catch(IllegalArgumentException exception){
+                    Logger.error(exception.getMessage());
+                }
 
                 return "";
             }
@@ -260,25 +276,21 @@ public class ConsoleInterface{
                     allMetrics.add(module.printMetrics());
                 }
 
-                //TODO: Whatever is to be done with output
+                for (String[] result : allResults) {
+                    System.out.println(Arrays.toString(result));
+                }
 
-                return "";
-            }
-        });
+                System.out.println("\nDisplay more advanced analysis? (Y/n)");
+                String choice = new Scanner(System.in).nextLine().toLowerCase();
 
-        m_commands.add(new Command(
-                "auto load",
-                "loads all modules registered to the module manager",
-                "N\\A"){
-            @Override
-            public String execute(String[] args){
-                sourceRoot = new SourceRoot(Paths.get(SENG4430.ROOT_PATH));
-                for (ModuleInterface mi : ModuleManager.getModuleList()){
-                    if (ModuleManager.loadModule(mi.getName())) {
-                        Logger.log(" Module " + mi.getName() + " successfully loaded");
+                if (!choice.equals("n") && !choice.equals("N")) {
+                    for (String metric : allMetrics) {
+                        System.out.println("-------------------------------------------------------------");
+                        System.out.println(metric);
                     }
                 }
-                return null;
+
+                return "";
             }
         });
     }
@@ -298,7 +310,7 @@ public class ConsoleInterface{
         String[] arr2 = in1.length > in2.length? in1 : in2;
         for (int i = 0; i < arr1.length; i++){
             if (!arr1[i].equals(arr2[i])) {
-//				Logger.debug(arr1[i] + " != " + arr2[i]);
+//				utils.Logger.debug(arr1[i] + " != " + arr2[i]);
                 return -1;
             }
         }

@@ -1,0 +1,17 @@
+#loop with detour -> paths: 5
+* 1 5
+1 2
+2 3
+3 4
+4 5
+#first loop
+4 6
+6 7
+7 8
+8 9
+9 10
+10 2
+#detour from 7 to 9
+7 11
+11 12
+12 9

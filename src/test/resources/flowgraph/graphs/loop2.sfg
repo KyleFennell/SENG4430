@@ -1,0 +1,11 @@
+#for loop in for loop -> paths: 3
+* 1 4
+1 2
+2 3
+2 4
+#inner loop
+3 5
+5 6
+6 5
+5 7
+7 2

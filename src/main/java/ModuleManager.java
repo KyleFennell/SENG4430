@@ -1,13 +1,16 @@
 import modules.ModuleInterface;
+import utils.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import modules.AdjustableModuleInterface;
+import utils.Adjustment;
 
 /**
  * Project          : Software Quality Assignment 1
  * Class name       : ModuleManager
  * Author(s)        : Kyle Fennell
- * Contributor(s)   : Ben Collins
+ * Contributor(s)   : Ben Collins, Nicolas Klenert
  * Date             : 28/03/19
  * Purpose          : Manages all modules in the system including getting,
  *                  registering and running them.
@@ -17,6 +20,7 @@ public class ModuleManager {
 
     private static List<ModuleInterface> m_modules = new ArrayList<>();
     private static List<ModuleInterface> m_loadedModules = new ArrayList<>();
+    private static final Adjustment ADJUSTMENTS = new Adjustment();
 
     /**
      * Get the list of loaded modules as modules.ModuleInterface Objects
@@ -73,6 +77,10 @@ public class ModuleManager {
     public static String listLoadedModules(){
         String list = "";
 
+        if (m_loadedModules.size() == 0) {
+            return "No Modules Loaded";
+        }
+
         for (ModuleInterface m : m_loadedModules){
             list += m.getName() + ", ";
         }
@@ -90,8 +98,8 @@ public class ModuleManager {
             if (m.getName().toLowerCase().equals(name.toLowerCase())){
                 return m;
             }
-            Logger.warning("No module found matching " + name);
         }
+        Logger.warning("No module found matching " + name);
         return null;
     }
 
@@ -100,11 +108,23 @@ public class ModuleManager {
      * @return true if successfully added
      */
     public static boolean loadModule(String m){
-        if (m_loadedModules.contains(getModuleByName(m))){
+        ModuleInterface module = getModuleByName(m);
+        if(module == null){
+            return false;
+        }
+        if (m_loadedModules.contains(module)){
             Logger.log("module " + m + " already loaded");
             return false;
         }
-        if (m_loadedModules.add(getModuleByName(m))){
+        if (m_loadedModules.add(module)){
+            if(module instanceof AdjustableModuleInterface){
+                //create adjustment for module
+                Adjustment modAdjust = ADJUSTMENTS.setModuleAccess(m);
+                //load default settings
+                modAdjust.addDefaults(((AdjustableModuleInterface) module).getDefaults());
+                //give the module the adjustments
+                ((AdjustableModuleInterface) module).setAdjustments(modAdjust);
+            }
             return true;
         }
         Logger.error("failed to add module " +  m + ". Reason unknown.");
@@ -137,5 +157,13 @@ public class ModuleManager {
         }
         Logger.warning("module " + m + " not loaded");
         return false;
+    }
+    
+    /** Reloads the configuration file
+     *
+     * @return true, if reload was successful
+     */
+    public static boolean reloadSettings(){
+        return ADJUSTMENTS.reloadSettings();
     }
 }
