@@ -51,7 +51,6 @@ abstract public class FlowGraphNumberExtractor  implements AdjustableModuleInter
      */
     @Override
     public String[] executeModule(SourceRoot sourceRoot) {
-        //TODO: Test
         //clear all runs before that one
         classInfos.clear();
         blocks.clear();

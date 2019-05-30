@@ -41,23 +41,36 @@ public class CyclicFlowGraphBuilder extends AbstractFlowGraphBuilder{
     }
     
     @Override
-    protected FlowGraph exploreLabeledStatement(LabeledStmt stmt){
-      FlowGraph graph = new FlowGraph(false);
-      String key = stmt.getLabel().getIdentifier();
-      labeledContinueStartPoints.put(key, graph.start);
-      labeledBreakEndPoints.put(key, graph.end);
-      graph = explore(stmt.getStatement(),true).merge(graph);
-      //not necessary, but good for debugging
-      labeledBreakEndPoints.remove(key);
-      labeledContinueStartPoints.remove(key);
-      return graph;
+    protected FlowGraph exploreLabeledStatement(LabeledStmt stmt){     
+        FlowGraph graph = new FlowGraph(false);
+        String key = stmt.getLabel().getIdentifier();
+        labeledContinueStartPoints.put(key, graph.start);
+        labeledBreakEndPoints.put(key, graph.end);
+        graph = explore(stmt.getStatement(),true).merge(graph);
+        //not necessary, but good for debugging
+        labeledBreakEndPoints.remove(key);
+        labeledContinueStartPoints.remove(key);
+        return graph;
     }
     
     @Override
     protected FlowGraph exploreContinueStatement(ContinueStmt stmt){
         if(stmt.getLabel().isPresent()){
-            return new FlowGraph(labeledContinueStartPoints.get(stmt.getLabel().get().getIdentifier()));
+            String key = stmt.getLabel().get().getIdentifier();
+            if(labeledContinueStartPoints.containsKey(key)){
+                //utils.Logger.error("Source Code is damaged, FlowGraph and such the metrics "
+                //        + "which are dependent can be wrong!");
+                //TODO: there have to be a mistake in the map! Test it out!
+                FlowGraph.FlowGraphNode temp = labeledContinueStartPoints.get(key);
+                return temp == null ? null : new FlowGraph(temp);
+            }
+            return new FlowGraph(labeledContinueStartPoints.get(key));
         }else{
+            if(continueStartPoint == null){
+                utils.Logger.error("Source Code is damaged, FlowGraph and such the metrics "
+                        + "which are dependent can be wrong!");
+                return null;
+            }
             return new FlowGraph(continueStartPoint);
         }
     }

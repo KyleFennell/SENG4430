@@ -9,8 +9,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 /** Represents the flow of code. Used to calculate different metrics.

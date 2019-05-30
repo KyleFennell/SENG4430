@@ -137,14 +137,19 @@ public abstract class AbstractFlowGraphBuilder {
         
         if(label == null){
             if(breakEndPoint == null){
-                //TODO: throw Exception? Or what? The source code has errors
+                 utils.Logger.error("Source Code is damaged, FlowGraph and such the metrics "
+                        + "which are dependent can be wrong!");
+                return null;
             }
             return new FlowGraph(breakEndPoint);
         }else{
             if(!labeledBreakEndPoints.containsKey(label)){
-                //TODO: throw Exception? Or what? The source code has errors
+                utils.Logger.error("Source Code is damaged, FlowGraph and such the metrics "
+                        + "which are dependent can be wrong!");
+                return null;
             }
             return new FlowGraph(labeledBreakEndPoints.get(label));
+
         }
     }
     
@@ -162,11 +167,10 @@ public abstract class AbstractFlowGraphBuilder {
     protected FlowGraph exploreSwitchStatement(SwitchStmt stmt){
         NodeList<SwitchEntry> entries = stmt.getEntries();
         if(entries.isEmpty()){
-            //TODO: The source code is stupid (switch without any cases)
+            utils.Logger.error("Source code has a switch statement without entries");
             return null;
         }else if(entries.size() == 1 && entries.get(0).getLabels().isEmpty()){
-            //TODO: The source code is stupid (switch with only default case)
-            
+            utils.Logger.warning("Source code has a switch statement with only default case");
             //first thing to do is to set the breakEndPoint
             FlowGraph graph = new FlowGraph(true);
             breakEndPoint = graph.end;
@@ -177,7 +181,6 @@ public abstract class AbstractFlowGraphBuilder {
         //we have a fairly normal switch statement
         boolean defaultExist = entries.get(entries.size()-1).getLabels().isEmpty();
         FlowGraph graph = new FlowGraph(!defaultExist);
-        //TODO: look at labels and figure out if a default case is even necessary
         breakEndPoint = graph.end;
         //set up last flowgraph and connect it normally
         FlowGraph last = explore(entries.get(entries.size()-1).getStatements(),true);
@@ -205,25 +208,31 @@ public abstract class AbstractFlowGraphBuilder {
         if(!opt.isPresent()){
             return null;
         }
-        returnEndPoint = new FlowGraph.FlowGraphNode();
-        FlowGraph graph = explore(opt.get());
-        if(graph.end.inDeg() > 0 && graph.end.outDeg() == 0){
+        FlowGraph graph = new FlowGraph(false);
+        returnEndPoint = graph.end;
+        FlowGraph child = explore(opt.get());
+        if(!method.getType().isVoidType() && child.end.inDeg() > 0 && child.end.outDeg() == 0){
             //not all possibilities are returning (at least one return statement is missing)
+            //for now we ignore it and "add default returns".
         }
-        graph.end = returnEndPoint;
         returnEndPoint = null;
-        return graph; 
+        return child.serial_merge(graph); 
     }
     
     protected FlowGraph exploreConstructorDeclaration(ConstructorDeclaration constructor){
-        returnEndPoint = new FlowGraph.FlowGraphNode();
-        FlowGraph graph = explore(constructor.getBody());
-        graph.end = returnEndPoint;
+        FlowGraph graph = new FlowGraph(false);
+        returnEndPoint = graph.end;
+        FlowGraph child = explore(constructor.getBody());
         returnEndPoint = null;
-        return graph;
+        return child.serial_merge(graph);
     }
     
     protected FlowGraph exploreReturnStatement(ReturnStmt stmt){
+        if(returnEndPoint == null){
+            utils.Logger.error("Source Code is damaged, FlowGraph and such the metrics "
+                        + "which are dependent can be wrong!");
+            return null;
+        }
         if(stmt.getExpression().isPresent()){
            return explore(stmt.getExpression().get()).serial_merge(new FlowGraph(returnEndPoint));
         }
@@ -299,7 +308,8 @@ public abstract class AbstractFlowGraphBuilder {
         FlowGraph head = list.poll();
         for(FlowGraph graph : list){
             if(head.end.inDeg() == 0){
-                //TODO: the next graphs are all unreachable!
+                //the next graphs are all unreachable, so just return head
+                return head;
             }
             head.serial_merge(graph);
         }
