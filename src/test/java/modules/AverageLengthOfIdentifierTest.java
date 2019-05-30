@@ -17,7 +17,7 @@ public class AverageLengthOfIdentifierTest {
 
     @BeforeAll
     public static void setUpClass() throws Exception {
-        sourceRoot = new SourceRoot(Paths.get("src\\main\\java"));
+        sourceRoot = new SourceRoot(Paths.get("test-projects\\Java-Static-Analyzer\\src\\main\\java"));
         sourceRoot.tryToParse();
     }
 
@@ -37,32 +37,32 @@ public class AverageLengthOfIdentifierTest {
         String[] expected = new String[]
                 {
                         "Category of identifier: All Identifiers",
-                        "Number of identifiers: 346",
-                        "Average identifier length: 9.05",
-                        "Standard Deviation of identifiers: 6.30",
+                        "Number of identifiers: 245",
+                        "Average identifier length: 10.09",
+                        "Standard Deviation of identifiers: 5.58",
                         "Category of identifier: Method Identifiers",
-                        "Number of identifiers: 87",
-                        "Average identifier length: 11.74",
-                        "Standard Deviation of identifiers: 6.56",
+                        "Number of identifiers: 51",
+                        "Average identifier length: 8.12",
+                        "Standard Deviation of identifiers: 5.03",
                         "Category of identifier: Variable Identifiers",
-                        "Number of identifiers: 157",
-                        "Average identifier length: 9.25",
-                        "Standard Deviation of identifiers: 6.15",
+                        "Number of identifiers: 73",
+                        "Average identifier length: 11.41",
+                        "Standard Deviation of identifiers: 6.31",
                         "Category of identifier: Class Identifiers",
-                        "Number of identifiers: 16",
-                        "Average identifier length: 14.69",
-                        "Standard Deviation of identifiers: 5.31",
+                        "Number of identifiers: 19",
+                        "Average identifier length: 15.47",
+                        "Standard Deviation of identifiers: 6.54",
                         "Category of identifier: Package Identifiers",
-                        "Number of identifiers: 9",
-                        "Average identifier length: 7.67",
-                        "Standard Deviation of identifiers: 2.67",
+                        "Number of identifiers: 18",
+                        "Average identifier length: 15.22",
+                        "Standard Deviation of identifiers: 3.91",
                         "Category of identifier: Parameter  Identifiers",
-                        "Number of identifiers: 77",
-                        "Average identifier length: 4.57",
-                        "Standard Deviation of identifiers: 3.28"
+                        "Number of identifiers: 84",
+                        "Average identifier length: 7.83",
+                        "Standard Deviation of identifiers: 2.62"
                 };
-        //  assertArrayEquals(expected, results);
-        assertEquals("false", "false");
+        assertArrayEquals(expected, results);
+        // assertEquals("false", "false");
     }
 
     @Test
@@ -76,61 +76,50 @@ public class AverageLengthOfIdentifierTest {
     @Test
     public void printMetrics() {
         aloi.executeModule(sourceRoot);
-        String expected =
-                "All Identifiers\n" +
-                        "Number of identifiers: 315\n" +
-                        "Average identifier length: 9.62\n" +
-                        "Standard Deviation of identifiers: 6.29\n" +
-                        "\n" +
-                        MEDIUM_AVERAGE_MESSAGE +
-                        "\n" +
-                        MEDIUM_STANDARD_DEVIATION_MESSAGE +
-                        "\n" +
-                        "Method Identifiers\n" +
-                        "Number of identifiers: 74\n" +
-                        "Average identifier length: 11.70\n" +
-                        "Standard Deviation of identifiers: 6.44\n" +
-                        "\n" +
-                        MEDIUM_AVERAGE_MESSAGE +
-                        "\n" +
-                        MEDIUM_STANDARD_DEVIATION_MESSAGE +
-                        "\n" +
-                        "Variable Identifiers\n" +
-                        "Number of identifiers: 153\n" +
-                        "Average identifier length: 10.00\n" +
-                        "Standard Deviation of identifiers: 6.32\n" +
-                        "\n" +
-                        MEDIUM_AVERAGE_MESSAGE +
-                        "\n" +
-                        MEDIUM_STANDARD_DEVIATION_MESSAGE +
-                        "\n" +
-                        "Class Identifiers\n" +
-                        "Number of identifiers: 17\n" +
-                        "Average identifier length: 14.00\n" +
-                        "Standard Deviation of identifiers: 4.97\n" +
-                        "\n" +
-                        MEDIUM_AVERAGE_MESSAGE +
-                        "\n" +
-                        MEDIUM_AVERAGE_MESSAGE +
-                        "\n" +
-                        "Parameter Identifiers\n" +
-                        "Number of identifiers: 63\n" +
-                        "Average identifier length: 5.29\n" +
-                        "Standard Deviation of identifiers: 3.79\n" +
-                        "\n" +
-                        LOW_AVERAGE_MESSAGE +
-                        "\n" +
-                        LOW_STANDARD_DEVIATION_MESSAGE +
-                        "\n" +
-                        "Package Identifiers\n" +
-                        "Number of identifiers: 8\n" +
-                        "Average identifier length: 7.75\n" +
-                        "Standard Deviation of identifiers: 2.82\n" +
-                        "\n" +
-                        LOW_AVERAGE_MESSAGE +
-                        "\n" +
-                        LOW_STANDARD_DEVIATION_MESSAGE +
-                        "\n";
-        assertEquals("false", "false");
+        String[] expected = new String[]{
+                "All Identifiers",
+                "Number of identifiers: 245",
+                "Average identifier length: 10.09",
+                "Standard Deviation of identifiers: 5.58\n",
+                MEDIUM_AVERAGE_MESSAGE,
+                MEDIUM_STANDARD_DEVIATION_MESSAGE,
+                "Method Identifiers",
+                "Number of identifiers: 51",
+                "Average identifier length: 8.12",
+                "Standard Deviation of identifiers: 5.03\n",
+                LOW_AVERAGE_MESSAGE,
+                MEDIUM_STANDARD_DEVIATION_MESSAGE,
+                "Variable Identifiers",
+                "Number of identifiers: 73",
+                "Average identifier length: 11.41",
+                "Standard Deviation of identifiers: 6.31\n",
+                MEDIUM_AVERAGE_MESSAGE,
+                MEDIUM_STANDARD_DEVIATION_MESSAGE,
+                "Class Identifiers",
+                "Number of identifiers: 19",
+                "Average identifier length: 15.47",
+                "Standard Deviation of identifiers: 6.54\n",
+                MEDIUM_AVERAGE_MESSAGE,
+                MEDIUM_STANDARD_DEVIATION_MESSAGE,
+                "Package Identifiers",
+                "Number of identifiers: 18",
+                "Average identifier length: 15.22",
+                "Standard Deviation of identifiers: 3.91\n",
+                MEDIUM_AVERAGE_MESSAGE,
+                MEDIUM_STANDARD_DEVIATION_MESSAGE,
+                "Parameter  Identifiers",
+                "Number of identifiers: 84",
+                "Average identifier length: 7.83",
+                "Standard Deviation of identifiers: 2.62\n",
+                LOW_AVERAGE_MESSAGE
+                ,
+                LOW_STANDARD_DEVIATION_MESSAGE
+
+        };
+        String[] result = aloi.printMetrics().split(System.getProperty("line.separator"));
+        for (int x = 0; x < expected.length; x++) {
+            assertEquals(expected[x], result[x]);
+        }
+        // assertArrayEquals(expected, ));
     }
 }

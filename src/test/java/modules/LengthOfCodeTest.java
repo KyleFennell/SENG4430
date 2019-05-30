@@ -16,8 +16,7 @@ import org.junit.jupiter.api.Disabled;
  * Date Created     : 13/05/19
  * Purpose          : This class is used to test the LengthOfCode module
  */
-@Disabled //disable class as long as the SourceRoot is not relative
-public class LengthOfCodeTest {
+class LengthOfCodeTest {
 
     private LengthOfCode loc;
     private static SourceRoot sourceRoot;
@@ -25,26 +24,28 @@ public class LengthOfCodeTest {
     private static SourceRoot sourceRoot2;
     
     @BeforeAll
-    public static void setUpClass() throws Exception {
-        sourceRoot = new SourceRoot(Paths.get("C:\\dev\\java\\Java-Static-Analyzer\\src\\main\\java"));
+    static void setUpClass() throws Exception {
+        sourceRoot = new SourceRoot(Paths.get("test-projects\\Java-Static-Analyzer\\src\\main\\java"));
         sourceRoot.tryToParse();
+
+        // For use on project completion
         sourceRoot2 = new SourceRoot(Paths.get("src\\main\\java"));
         sourceRoot2.tryToParse();
     }
 
     @BeforeEach
-    public void setUpMethod() {
+    void setUpMethod() {
         loc = new LengthOfCode();
         loc2 = new LengthOfCode();
     }
 
     @Test
-    public void getName() {
+    void getName() {
         assertEquals(loc.getName(), "LengthOfCode");
     }
 
     @Test
-    public void ExecuteModule() {
+    void executeModule() {
         String[] results = loc.executeModule(sourceRoot);
         String[] expected = new String[] {
             "LengthOfCode",
@@ -57,8 +58,9 @@ public class LengthOfCodeTest {
         assertArrayEquals(expected, results);
     }
 
+    @Disabled("Tests the current project files. Requires project completion")
     @Test
-    public void executeModule2() {
+    void executeModule2() {
         String[] results = loc2.executeModule(sourceRoot2);
         String[] expected = new String[] {
             "LengthOfCode",
@@ -72,7 +74,7 @@ public class LengthOfCodeTest {
     }
 
     @Test
-    public void getDescription() {
+    void getDescription() {
         String description = "This is a measure of the size of a program. Generally, the larger" +
                 " the size of the code of a component, the more complex and error-prone" +
                 " that component is likely to be. Length of code has been shown to be" +
@@ -81,16 +83,29 @@ public class LengthOfCodeTest {
     }
 
     @Test
-    public void printMetrics() {
+    void printMetrics() {
         loc.executeModule(sourceRoot);
         String expected = "";
         assertEquals(expected, loc.printMetrics());
     }
 
+    @Disabled("Tests the current project files. Requires project completion")
     @Test
-    public void printMetrics2() {
+    void printMetrics2() {
         loc2.executeModule(sourceRoot2);
-        String expected = "C:\\dev\\uni\\SENG4430\\src\\main\\java\\ConsoleInterface.java: 343 lines. [File larger than 200, may need reviewing]\r\n";
-        assertEquals(expected, loc2.printMetrics());
+        String[] expected = {
+                "flowgraph\\FlowGraph.java: 322 lines. [File larger than 200, may need reviewing]",
+                "flowgraph\\AbstractFlowGraphBuilder.java: 271 lines. [File larger than 200, may need reviewing]",
+                "modules\\AverageLengthOfIdentifier.java: 268 lines. [File larger than 200, may need reviewing]",
+                "modules\\UnmeetableCode.java: 247 lines. [File larger than 200, may need reviewing]",
+                "ConsoleInterface.java: 367 lines. [File larger than 200, may need reviewing]",
+                "modules\\FlowGraphNumberExtractor.java: 214 lines. [File larger than 200, may need reviewing]"
+        };
+        String actual = loc2.printMetrics();
+
+        assertFalse(actual.isEmpty());
+        for (String str : expected) {
+            assertTrue(actual.contains(str));
+        }
     }
 }
