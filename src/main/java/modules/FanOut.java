@@ -29,7 +29,7 @@ public class FanOut implements ModuleInterface{
     private Map<String, Map<String, Integer>> collatedUniqueFanOut = new HashMap<>();
     @Override
     public String getName() {
-        return "Fan_Out";
+        return "FanOut";
     }
 
     @Override

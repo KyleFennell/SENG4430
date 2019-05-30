@@ -68,6 +68,8 @@ public class ConsoleInterface{
         ModuleManager.registerModule(new AverageLengthOfIdentifier());
         ModuleManager.registerModule(new UnmeetableCode());
         ModuleManager.registerModule(new FogIndex());
+        ModuleManager.registerModule(new StringMatchFanIn());
+        ModuleManager.registerModule(new FanOut());
     }
 
     /**
