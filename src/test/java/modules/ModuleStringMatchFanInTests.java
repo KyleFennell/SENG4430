@@ -17,9 +17,9 @@ public class ModuleStringMatchFanInTests {
         StringMatchFanIn smFanIn = new StringMatchFanIn();
         String[] results = smFanIn.executeModule(sourceRoot);
         for (String s : results){
-            System.out.println(s);
+            //System.out.println(s);
         }
-        System.out.println("RESULTS: " + smFanIn.printMetrics());
+        //System.out.println("RESULTS: " + smFanIn.printMetrics());
     }
 
     @Test
