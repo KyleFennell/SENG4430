@@ -19,12 +19,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import utils.Adjustment;
 
-/**
- * Project          : Software Quality Assignment 1
- * Class name       : FlowGraphNumberExtractor
- * @author(s)       : Nicolas Klenert
- * Date             : 14/05/19
- * Purpose          : Abstract Module used to calculate some statistic number on FlowGraphs.
+/** Abstract Module used to calculate some statistic number on FlowGraphs.
+ * 
+ * <p>Project          : Software Quality Assignment 1<br>
+ *    Date             : 26/05/19</p>
+ * 
+ * @author Nicolas Klenert
+ * @see CyclomaticComplexity
+ * @see NumberOfPaths
+ * 
  */
 abstract public class FlowGraphNumberExtractor  implements AdjustableModuleInterface{
     
@@ -39,16 +42,19 @@ abstract public class FlowGraphNumberExtractor  implements AdjustableModuleInter
         blocks = new ArrayList<>();
     }
     
-    abstract protected int getFlowGraphNumber(FlowGraph graph);
-    abstract protected String getNameOfNumber();
-    
-    @Override
-    abstract public String getName();
-
-    /**
-     * @param sourceRoot the sourceRoot created by JavaParser
-     * @return results of the module being run
+    /** Return the value of a graph which we are interested in.
+     * 
+     * @param graph any {@link FlowGraph}
+     * @return metric of the FlowGraph given
      */
+    abstract protected int getFlowGraphNumber(FlowGraph graph);
+    
+    /** Name of the metric or the name of the number from the metric used.
+     * 
+     * @return name used to print in tandem with the value gotten from {@link getFlowGraphNumber}
+     */
+    abstract protected String getNameOfNumber();
+
     @Override
     public String[] executeModule(SourceRoot sourceRoot) {
         //clear all runs before that one
@@ -81,16 +87,6 @@ abstract public class FlowGraphNumberExtractor  implements AdjustableModuleInter
         };
     }
 
-    /**
-     * @return a description of what the module is testing
-     */
-    @Override
-    abstract public String getDescription();
-
-    /**
-     * @return a formatted string that represents the metrics determined
-     * by the module
-     */
     @Override
     public String printMetrics() {
         StringBuilder stringBuilder = new StringBuilder();
@@ -121,8 +117,8 @@ abstract public class FlowGraphNumberExtractor  implements AdjustableModuleInter
         return map;
     }
     
-    /** Class and it's children are used to store the information gathered.
-     * 
+    /**
+     * Stores and calculates information of classes and components.
      */
     private class ClassInfo{
         final String filePath;
@@ -132,6 +128,12 @@ abstract public class FlowGraphNumberExtractor  implements AdjustableModuleInter
         final int max;
         final int median;
         final int sum;
+        
+        /** Constructs and calculates all important information of a class.
+         * 
+         * @param classDeclaration given by a JavaParser
+         * @param filePath of the file in which the class was found
+         */
         public ClassInfo(ClassOrInterfaceDeclaration classDeclaration, String filePath){
             name = classDeclaration.getNameAsString();
             this.filePath = filePath;
@@ -181,6 +183,9 @@ abstract public class FlowGraphNumberExtractor  implements AdjustableModuleInter
         }
     }
     
+    /**
+     * Stores information of one component.
+     */
     private class CodeBlock{
         int number;
         int startLine;

@@ -91,11 +91,18 @@ public class FlowGraph {
     protected FlowGraphNode start;
     protected FlowGraphNode end;
     
+    /**
+     *  Creates a one-node {@code FlowGraph}.
+     */
     public FlowGraph(){
         start = new FlowGraphNode();
         end = start;
     }
     
+    /** Creates a two-node graph.
+     * 
+     * @param bool if true, the start node will point to the end node of the graph.
+     */
     public FlowGraph(boolean bool){
         start = new FlowGraphNode();
         end = new FlowGraphNode();
@@ -104,6 +111,13 @@ public class FlowGraph {
         }
     }
     
+    /** Creates the basic {@code FlowGraph} representing a loop.
+     * 
+     * @param doLoop if the {@code FlowGraph} should represent a do-while loop
+     * @return the whole {@code FlowGraph} as well as
+     * the {@code FlowGraphNode} representing the condition of the loop and
+     * the {@code FlowGraphNode} representing the inner code of the loop (in this order)
+     */
     public static Pair<FlowGraph,Pair<FlowGraphNode,FlowGraphNode>> createLoopFlowGraph(boolean doLoop){
         FlowGraph graph = new FlowGraph(false);
         FlowGraphNode control = new FlowGraphNode();
@@ -115,13 +129,17 @@ public class FlowGraph {
         return new Pair<>(graph,new Pair<>(control,innerCode));
     }
     
+    /** Creates a one-node {@code FlowGraph} and let it point the the node give.
+     * 
+     * @param node to the {@code FlowGraph} should point to.
+     */
     protected FlowGraph(FlowGraphNode node){
         start = new FlowGraphNode();
         end = start;
         end.addTo(node);
     }
     
-    /** Creates a Flowgraph from a file. Numbers are used for the identification of the nodes.
+    /** Creates a {@code FlowGraph} from a file. Numbers are used for the identification of the nodes.
      *  The start and endnode of the graph are given in the line starting with *!
      *  All other lines give the edges of the graph as "fromNode toNode".
      *  Lines starting with # are comments and such ignored.
@@ -193,6 +211,14 @@ public class FlowGraph {
         return this;
     }
     
+    /** Serial merges all graphs together.
+     * 
+     * 
+     * @param graphs to merged. Order is taken from the iterator of the collection.
+     * @return Serial merged graph
+     * 
+     * @see serial_merge
+     */
     public FlowGraph serial_merge(Collection<FlowGraph> graphs){
         for(FlowGraph graph : graphs){
             this.serial_merge(graph);
@@ -200,6 +226,15 @@ public class FlowGraph {
         return this;
     }
     
+    /** Appends the given {@code FlowGraph}.
+     * 
+     *  <p>A graph is appended by letting the start node point to the start node of the graph given.
+     *  If the end point of the graph given does not point to anything, it will be pointing to the end node
+     *  of this graph.</p>
+     * 
+     * @param graph to append
+     * @return itself
+     */
     public FlowGraph parallel_append(FlowGraph graph){
         if(graph.end.outDeg() != 0){
             //if graphs end is already has an outlet, do not connect it!
@@ -213,11 +248,28 @@ public class FlowGraph {
         return this;
     }
     
+    /** Only append the given graph on the start node.
+     * 
+     * @param graph to append
+     * @return itself
+     * 
+     * @see parallel_append
+     */
     private FlowGraph parallel_append_start(FlowGraph graph){
         start.addTo(graph.start);
         return this;
     }
-        
+    
+    /** Appends the given {@code FlowGraph}.
+     * 
+     * <p>Works the same as {@link parallel_append} but the end node of the graph
+     * given will not point to the end point of this graph, but to the start point
+     * of {@code detour}.</p>
+     * 
+     * @param graph to append
+     * @param detour to point to, if end node of {@code graph} does not point to anything yet
+     * @return itself
+     */
     public FlowGraph parallel_append_detour(FlowGraph graph, FlowGraph detour){
         if(graph.end.outDeg() != 0){
             //if graphs end is already has an outlet, do not connect it!
@@ -231,12 +283,12 @@ public class FlowGraph {
         return this;
     }
     
-    @Deprecated
-    protected FlowGraph insertIntoStartNode(FlowGraph graph){
-        start.merge(graph.start);
-        return this;
-    }
-    
+    /** Appends all graphs given.
+     * 
+     * @param graphs to be appended
+     * @return itself
+     * @see parallel_append
+     */
     public FlowGraph parallel_append(Collection<FlowGraph> graphs){
         for(FlowGraph graph : graphs){
             this.parallel_append(graph);
@@ -302,13 +354,13 @@ public class FlowGraph {
         return getEdgeCount() - getNodeCount() +2;
     }
     
-    /** Calculates the number of different path trough the graph.
+    /** Calculates the number of different paths through the graph.
      * 
      * @return number of different paths of the FlowGraph or -1 if there an infinite many (because it's cyclic)
      */
     public int getNumberOfPaths(){       
-        HashMap<FlowGraphNode, Integer> number = new HashMap<>(); //all nodes above 0
-        LinkedList<FlowGraphNode> queue = new LinkedList<>(); //all nodes with 0 and labeled
+        HashMap<FlowGraphNode, Integer> number = new HashMap<>();
+        LinkedList<FlowGraphNode> queue = new LinkedList<>();
         HashMap<FlowGraphNode, Integer> label = new HashMap<>();
         
         label.put(start,1);
@@ -333,7 +385,7 @@ public class FlowGraph {
         }while(!queue.isEmpty());
         
         if(!number.isEmpty()){
-            //TODO: there has to be a loop in the FlowGraph! Error!
+            //there has to be a loop in the graph
             return -1;
         }
         

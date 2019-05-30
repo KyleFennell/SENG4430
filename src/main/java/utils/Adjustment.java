@@ -4,27 +4,49 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-/**
- * Project          : Software Quality Assignment 1
- * Class name       : Adjustment
- * @Author(s)       : Nicolas Klenert
- * Date             : 27/05/19
- * Purpose          : Class to regulate the the settings of each module.
+/** Class to regulate the the settings of each module.
+ * 
+ * <p>Used to distribute the configurations which will be always up-to-date.
+ *  Furthermore it prevents name space collisions and makes sure that there is
+ *  always a default value.</p>
+ * 
+ * <p>Project       : Software Quality Assignment 1<br>
+ * Date             : 24/05/19</p>
+ * 
+ * @author Nicolas Klenert
+ * @see modules.AdjustableModuleInterface
  */
 public class Adjustment{
     private final String moduleIdentifier;
     private final ExtendedProperties props;
     
+    /** Creates the first Adjustment in the system.
+     * 
+     *  <p>Should be used if the main system should not have a name.</p>
+     */
     public Adjustment(){
         this("");
     }
     
+    /** Creates a named Adjustment.
+     * 
+     * <p>Can be used if the main system, holding onto the first instance of this class,
+     * should also be named.</p>
+     * 
+     * @param moduleIdentifier 
+     */
     private Adjustment(String moduleIdentifier){
         this.moduleIdentifier = moduleIdentifier;
         props = new ExtendedProperties();
         loadSettings();
     }
     
+    /** Should only be used by {@link setModuleAccess}.
+     * 
+     * @param props the properties which will be hold on to
+     * @param moduleIdentifier 
+     * @see setModuleAccess
+     */
     private Adjustment(ExtendedProperties props, String moduleIdentifier){
         this.props = props;
         this.moduleIdentifier = moduleIdentifier;
@@ -41,6 +63,10 @@ public class Adjustment{
         return true;
     }
     
+    /** Actualise the configuration.
+     * 
+     * @return true, if the configuration could be reloaded
+     */
     public boolean reloadSettings(){
         props.clear();
         return loadSettings();
@@ -55,22 +81,41 @@ public class Adjustment{
         return new Adjustment(props,moduleIdentifier);
     }
     
+    /** Saves default values for it's properties. Name spaces apply. 
+     * 
+     * @param map (key, default value) pair
+     */
     public void addDefaults(Map<String,String> map){
         map.forEach((String key, String value) -> {
             props.addDefault(moduleIdentifier+"_"+key, value);
         });
     }
     
+    /** Retrieve user configuration or default value if no other configuration was given.
+     * 
+     * <p>Important: Only configuration which already have a default value can be retrieved!
+     *  This is to reduce bug vulnerability.</p>
+     * 
+     * @param identifier key to use
+     * @return value of user or default value mapped to key
+     */
     public String getString(String identifier){
         try{
            return props.getProperty(moduleIdentifier+"_"+identifier);
         }catch(IllegalArgumentException exception){
             utils.Logger.error("Module "+moduleIdentifier+" tried to access a property for which it didn't gave a default value!");
-            //System.out.println(props.getDefaultKeys());
             return null;
         }
     }
     
+    /** Retrieve user configuration or default value if no other configuration was given.
+     * 
+     * <p>Important: Only configuration which already have a default value can be retrieved!
+     *  This is to reduce bug vulnerability.</p>
+     * 
+     * @param identifier key to use
+     * @return value of user or default value mapped to key
+     */
     public int getInt(String identifier){
         try{
             return Integer.parseInt(props.getProperty(moduleIdentifier+"_"+identifier));

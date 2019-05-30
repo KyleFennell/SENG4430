@@ -3,12 +3,16 @@ package modules;
 import java.util.Map;
 import utils.Adjustment;
 
-/**
- * Project          : Software Quality Assignment 1
- * Class name       : AdjustableModuleInterface
- * @Author(s)       : Nicolas Klenert
- * Date             : 27/05/19
- * Purpose          : Template Interface used to discern if a module is adjustable.
+/** Template Interface used to discern if a module is adjustable.
+ * 
+ * <p>Project          : Software Quality Assignment 1<br>
+ *    Date             : 27/05/19</p>
+ * 
+ * @author Nicolas Klenert
+ * @see utils.Adjustment
+ * @see CyclomaticComplexity
+ * @see NumberOfPaths
+ * 
  */
 public interface AdjustableModuleInterface extends ModuleInterface{
     
@@ -18,6 +22,10 @@ public interface AdjustableModuleInterface extends ModuleInterface{
      */
     void setAdjustments(Adjustment setting);
     
+    /** Returns a map signalising both, the only keys the module will ask for and their default value.
+     * 
+     * @return (key,default value) pairs
+     */
     Map<String,String> getDefaults();
     
 }

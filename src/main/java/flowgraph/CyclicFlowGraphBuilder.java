@@ -57,12 +57,10 @@ public class CyclicFlowGraphBuilder extends AbstractFlowGraphBuilder{
     protected FlowGraph exploreContinueStatement(ContinueStmt stmt){
         if(stmt.getLabel().isPresent()){
             String key = stmt.getLabel().get().getIdentifier();
-            if(labeledContinueStartPoints.containsKey(key)){
-                //utils.Logger.error("Source Code is damaged, FlowGraph and such the metrics "
-                //        + "which are dependent can be wrong!");
-                //TODO: there have to be a mistake in the map! Test it out!
-                FlowGraph.FlowGraphNode temp = labeledContinueStartPoints.get(key);
-                return temp == null ? null : new FlowGraph(temp);
+            if(!labeledContinueStartPoints.containsKey(key)){
+                utils.Logger.error("Source Code is damaged, FlowGraph and such the metrics "
+                        + "which are dependent can be wrong!");
+                return null;
             }
             return new FlowGraph(labeledContinueStartPoints.get(key));
         }else{

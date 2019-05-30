@@ -46,6 +46,8 @@ import java.util.Optional;
  * 
  *  <p>Extended by {@link CyclicFlowGraphBuilder} and {@link AcyclicFlowGraphBuilder}</p>
  * 
+ * <p> Main entry point of this class is the function {@link explore}</p>
+ * 
  * @author Nicolas Klenert
  * @see CyclicFlowGraphBuilder
  * @see AcyclicFlowGraphBuilder
@@ -76,6 +78,47 @@ public abstract class AbstractFlowGraphBuilder {
     AbstractFlowGraphBuilder(){
         labeledBreakEndPoints = new HashMap<>();
     }
+    
+    /** Describes behaviour of a GraphBuilder when seeing a {@code LoopStatement}.
+     * 
+     * <p>Some metrics are only usable if loops are handled in different ways.
+     * Such the implementation of this function as well as {@link exploreDoStatement} 
+     * and {@link exploreContinueStatement} are left for the children of this
+     * class to implement.</p>
+     * 
+     * @param <T> class of the loop (While, ForEach or For)
+     * @param stmt the loop statement to explore
+     * @return {@code FlowGraph} representing the flow of code inside and the loop itself
+     * 
+     * @see exploreDoStatement
+     */
+    protected abstract <T extends Node> FlowGraph exploreLoopStatement(NodeWithBody<T> stmt);
+    
+    /** Describes behaviour of a GraphBuilder when seeing a do-while statement.
+     * 
+     * <p>Some metrics are only usable if loops are handled in different ways.
+     * Such the implementation of this function as well as {@link exploreDoStatement} 
+     * and {@link exploreContinueStatement} are left for the children of this
+     * class to implement.</p>
+     * 
+     * @param stmt the loop statement to explore
+     * @return {@code FlowGraph} representing the flow of code inside and the loop itself
+     */
+    protected abstract FlowGraph exploreDoStatement(DoStmt stmt);
+    
+    /** Describes behaviour of a GraphBuilder when seeing a continue statement.
+     * 
+     * <p>Some metrics are only usable if loops are handled in different ways.
+     * Such the implementation of this function as well as {@link exploreDoStatement} 
+     * and {@link exploreContinueStatement} are left for the children of this
+     * class to implement.</p>
+     * 
+     * @param stmt the statement to explore
+     * @return {@code FlowGraph} containing only one node which
+     * is pointed to the {@code FlowGraphNode} representing the entry point
+     * after the continue statement.
+     */
+    protected abstract FlowGraph exploreContinueStatement(ContinueStmt stmt);
     
     /** Resolves an if-else statements so it can have multiple then statements and one optional else statement.
      * 
@@ -161,13 +204,11 @@ public abstract class AbstractFlowGraphBuilder {
       labeledBreakEndPoints.remove(key); //not necessary, but good for debugging
       return graph;
     }
-    
-    protected abstract FlowGraph exploreContinueStatement(ContinueStmt stmt);
        
     protected FlowGraph exploreSwitchStatement(SwitchStmt stmt){
         NodeList<SwitchEntry> entries = stmt.getEntries();
         if(entries.isEmpty()){
-            utils.Logger.error("Source code has a switch statement without entries");
+            utils.Logger.warning("Source code has a switch statement without entries");
             return null;
         }else if(entries.size() == 1 && entries.get(0).getLabels().isEmpty()){
             utils.Logger.warning("Source code has a switch statement with only default case");
@@ -199,9 +240,6 @@ public abstract class AbstractFlowGraphBuilder {
         return graph;
     }
     
-    protected abstract <T extends Node> FlowGraph exploreLoopStatement(NodeWithBody<T> stmt);
-    protected abstract FlowGraph exploreDoStatement(DoStmt stmt);
-    
     protected FlowGraph exploreMethodDeclaration(MethodDeclaration method){
         //look if the method decleration has a body
         Optional<BlockStmt> opt = method.getBody();
@@ -212,8 +250,7 @@ public abstract class AbstractFlowGraphBuilder {
         returnEndPoint = graph.end;
         FlowGraph child = explore(opt.get());
         if(!method.getType().isVoidType() && child.end.inDeg() > 0 && child.end.outDeg() == 0){
-            //not all possibilities are returning (at least one return statement is missing)
-            //for now we ignore it and "add default returns".
+            utils.Logger.error("At least one return statement is missing");
         }
         returnEndPoint = null;
         return child.serial_merge(graph); 
@@ -239,10 +276,27 @@ public abstract class AbstractFlowGraphBuilder {
         return new FlowGraph(returnEndPoint);
     }
     
+    /** Main entry point. Always returns a not-null {@code FlowGraph}.
+     * 
+     * Explores recursively {@code node} and it's children and creates a {@code FlowGraph} out of it.
+     * 
+     * @param node start point of the search algorithm
+     * @return graph representing the flow of code with node as start point
+     * 
+     * @see FlowGraph
+     */
     public FlowGraph explore(Node node){
         return explore(node,true);
     }
     
+    /** Main entry point. Can return null.
+     * 
+     * Explores recursively {@code node} and it's children and creates a {@code FlowGraph} out of it.
+     * 
+     * @param node start point of the search algorithm
+     * @param noNull if false, null as return value is allowed
+     * @return graph representing the flow of code or null if there is no decision tree
+     */
     public FlowGraph explore(Node node, boolean noNull) {
         FlowGraph graph;
         if(node == null){

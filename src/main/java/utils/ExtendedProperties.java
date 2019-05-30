@@ -1,14 +1,17 @@
 package utils;
 
-import java.util.Map;
 import java.util.Properties;
 
-/**
- * Project          : Software Quality Assignment 1
- * Class name       : ExtendedProperties
- * @Author(s)       : Nicolas Klenert
- * Date             : 27/05/19
- * Purpose          : Used to extend the functionality of Properties and to ensure default settings.
+/** Used to extend the functionality of Properties and to ensure default settings.
+ * 
+ * <p>Do not use this class directly. Instead use {@link Adjustment}! This
+ *  class only exist to get access on the default values of {@code Properties}</p>
+ * 
+ * <p>Project       : Software Quality Assignment 1<br>
+ * Date             : 24/05/19</p>
+ * 
+ * @author Nicolas Klenert
+ * @see Adjustment
  */
 public class ExtendedProperties extends Properties{
     

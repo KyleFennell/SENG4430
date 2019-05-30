@@ -5,15 +5,26 @@ import flowgraph.FlowGraph;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Project          : Software Quality Assignment 1
- * Class name       : NumberOfPaths
- * @author(s)       : Nicolas Klenert
- * Date             : 14/05/19
- * Purpose          : Module to calculate the number of different paths of a FlowGraph.
+/** Calculates the number of different paths of a FlowGraph.
  * 
- * This module can be used to estimate how many test are needed to fully test the behaviour of a method.
- * Different paths on FlowGraph are paths, which have at least one not in common with each other.
+ *  <p>This module can be used to estimate how many test are needed to fully test the behaviour of a method.
+ * Different paths on FlowGraph are paths, which have at least one not in common with each other.</p>
+ * 
+ *  <p>It is configurable with the configuration file with the name {@code config.properties}.<br>
+ *  Possible identifiers are: <br>
+ *  NumberOfPaths_scope : class | components - print components or classes for the advanced analysis<br>
+ *  NumberOfPaths_classThreshold : [int] - print only classes which have at least that number of different paths<br>
+ *  NumberOfPaths_componentThreshild : [int] - print only components which have at least that number of different paths</p>
+ * 
+ * <p>Components are initializers, constructors and methods.</p>
+ * 
+ * <p>Project          : Software Quality Assignment 1<br>
+ *    Date             : 26/05/19</p>
+ * 
+ * @author Nicolas Klenert
+ * @see AdjustableModuleInterface
+ * @see AcyclicFlowGraphBuilder
+ * 
  */
 public class NumberOfPaths extends FlowGraphNumberExtractor {
         
@@ -31,7 +42,7 @@ public class NumberOfPaths extends FlowGraphNumberExtractor {
      */
     @Override
     public String getDescription() {
-        return "";
+        return "Calculates the number of different paths of a FlowGraph.";
     }
 
     @Override

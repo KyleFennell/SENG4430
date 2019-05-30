@@ -3,14 +3,26 @@ package flowgraph;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- *
+/** Tests the most important methods of {@link FlowGraph}.
+ * 
+ *  Not all methods are tested. But this is also not necessary because all
+ *  tests of {@link AbstractFlowGraphBuilder} and some other are also testing
+ *  the behaviour of {@code FlowGraph}. These tests are primarily to check
+ *  if the class was changed by accident.
+ * 
+ * <p>Project       : Software Quality Assignment 1<br>
+ * Date             : 04/05/19</p>
+ * 
  * @author Nicolas Klenert
+ * @see FlowGraph
  */
 public class FlowGraphTest {
     
     private final String dir = "src/test/resources/flowgraph/graphs/";
 
+    /**
+     *  Test the method {@link parallel_append} of {@link FlowGraph}.
+     */
     @Test
     public void testParallelAppend(){
         FlowGraph graph = new FlowGraph();
@@ -25,6 +37,9 @@ public class FlowGraphTest {
         assertEquals(5,graph.getNodeCount());
     }
     
+    /**
+     *  Test the method {@link serial_merge} of {@link FlowGraph}.
+     */
     @Test
     public void testSerialMerge(){
         FlowGraph graph = new FlowGraph();
@@ -39,6 +54,9 @@ public class FlowGraphTest {
         assertEquals(2,graph.getNodeCount());
     }
     
+    /**
+     *  Test the method {@link merge} of {@link FlowGraph}.
+     */
     @Test
     public void testMerge(){
         FlowGraph graph = new FlowGraph(true);
@@ -47,6 +65,9 @@ public class FlowGraphTest {
         assertEquals(2,graph.getNodeCount());
     }
     
+    /**
+     *  Test the method {@link NumberOfPaths} of {@link FlowGraph}.
+     */
     @Test
     public void testNumberOfPaths(){
         FlowGraph empty = new FlowGraph();
@@ -57,6 +78,9 @@ public class FlowGraphTest {
         //more test are done in tandem with testFlowGraphFromFile
     }
     
+    /**
+     *  Test the construction of {@link FlowGraph} out of files.
+     */
     @Test
     public void testFlowGraphFromFile(){
         String[] files = {"test1","test2","loop1","abstract1","abstract2"};
@@ -70,6 +94,5 @@ public class FlowGraphTest {
             assertEquals(edges[i],graph.getEdgeCount());
             assertEquals(paths[i],graph.getNumberOfPaths());
         }
-        //TODO: test more!
     }
 }

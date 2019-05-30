@@ -30,7 +30,8 @@ public class CyclicFlowGraphBuilderTest {
     /** Parameterized Test used to compare created FlowGraph of CyclicFlowGraphBuilder with given graph.
      * 
      * @param code code snippet used to create the FlowGraph, has to represent a statement
-     * @param file filename of the saved graph
+     * @param file name in the {@code test/resource/flowgraph/graph} directory from which
+     *              the other {@code FlowGraph} is created.
      */
     @DisplayName("CyclicFlowGraphBuilder behaviour")
     @ParameterizedTest(name = "[{index}]: {2}")
@@ -52,7 +53,7 @@ public class CyclicFlowGraphBuilderTest {
     }
     
     /**
-     * Test of ifStatementResolver method, of class FlowGraphBuilder.
+     * Test of ifStatementResolver method, of class {@link AbstractFlowGraphBuilder}.
      */
     @Test
     public void testIfStatementResolver() {
