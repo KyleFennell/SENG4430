@@ -26,7 +26,7 @@ public class FanIn implements ModuleInterface{
 
     @Override
     public String getName() {
-        return "Fan_In";
+        return "FanIn";
     }
 
     @Override

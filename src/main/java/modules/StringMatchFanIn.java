@@ -28,7 +28,7 @@ public class StringMatchFanIn implements ModuleInterface{
 
     @Override
     public String getName() {
-        return "String_Match_Fan_In";
+        return "StringMatchFanIn";
     }
 
     @Override
