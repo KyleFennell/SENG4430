@@ -50,6 +50,7 @@ public class NumberOfComments implements ModuleInterface {
 					   "return a single optimal value";
 	}
 
+	@Override
 	public String printMetrics() {
 		return "Breakdown: "
 				       + printMetricsTable(results) + System.lineSeparator()
@@ -84,22 +85,40 @@ public class NumberOfComments implements ModuleInterface {
 		String[] headers = { "Class Name", "todo", "copyright", "l_commentSeg", "javadoc" };
 		return TableUtil.fileReportsToTable(res, headers);
 	}
-	String[] executeModule() {
-		SourceRoot sourceRoot = new SourceRoot(Paths.get(ANALYSIS_ROOT));
-		return executeModule(sourceRoot);
+
+	
+	private String[] moduleOutput(List<FileReport> results) {
+		double[] averageSubMetrics = new double[4];
+		int totalFiles = results.size();
+
+		for (FileReport file : results)
+			for (int i = 0; i < file.getAnalyses().length; i++)
+				averageSubMetrics[i] += file.getAnalyses()[i].getOptimalValue();
+
+		for (int i = 0; i < averageSubMetrics.length; i++)
+			averageSubMetrics[i] = averageSubMetrics[i] / (double) totalFiles;
+
+		return new String[] {
+				getName(), "totalFiles: " + totalFiles,
+				"AverageTodo: " + averageSubMetrics[0],
+				"AverageCopyRight: " + averageSubMetrics[1],
+				"AverageCommentSeg: " + averageSubMetrics[2],
+				"AverageJavadoc: " + averageSubMetrics[3]
+		};
 	}
+
+
 	@Override
 	public String[] executeModule(SourceRoot sourceRoot) {
-		List<FileReport> results = new ArrayList<>();
+		results = new ArrayList<>();
 		try {
 			sourceRoot.tryToParse();
 			for (CompilationUnit unit : sourceRoot.getCompilationUnits())
 				results.add(analyse(unit));
-			printMetricsTable(results);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return new String[0];
+		return moduleOutput(results);
 	}
 
 

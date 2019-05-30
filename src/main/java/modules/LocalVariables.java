@@ -53,9 +53,8 @@ public class LocalVariables implements ModuleInterface {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return new String[0];
+		return new String[] {printMetricTable(results)};
 	}
-
 
 
 	private FileReport analyse(CompilationUnit unit) {
@@ -71,9 +70,9 @@ public class LocalVariables implements ModuleInterface {
 
 
 
-	private void printMetricTable(List<FileReport> results) {
+	private String printMetricTable(List<FileReport> results) {
 		String[] headers = { "Class Name", "same_line_vars", "multi_rand"};
-		System.out.println(TableUtil.fileReportsToTable(results, headers));
+		return TableUtil.fileReportsToTable(results, headers);
 	}
 
 
