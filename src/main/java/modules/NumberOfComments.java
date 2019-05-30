@@ -9,6 +9,8 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.visitor.VoidVisitor;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.utils.SourceRoot;
+import com.mitchtalmadge.asciidata.table.ASCIITable;
+import com.mitchtalmadge.asciidata.table.formats.ASCIITableFormat;
 import modules.helpers.Analysis;
 import modules.helpers.FileReport;
 import modules.helpers.TableUtil;
@@ -33,6 +35,7 @@ import static com.github.javaparser.GeneratedJavaParserConstants.SINGLE_LINE_COM
  */
 public class NumberOfComments implements ModuleInterface {
 	private static final String ANALYSIS_ROOT = "resources/Example2";
+	List<FileReport> results;
 
 	@Override
 	public String getName() { return "NumberOfComments"; }
@@ -47,15 +50,40 @@ public class NumberOfComments implements ModuleInterface {
 					   "return a single optimal value";
 	}
 
-	@Override
-	public String printMetrics() { return null; }
+	public String printMetrics() {
+		return "Breakdown: "
+				       + printMetricsTable(results) + System.lineSeparator()
+				       + "Warnings: " + System.lineSeparator()
+				       + printWarningsTable(results);
 
-	private void printMetricsTable(List<FileReport> res) {
-		String[] headers = { "Class Name", "todo", "copyright", "l_commentSeg", "javadoc" };
-		System.out.println(TableUtil.fileReportsToTable(res, headers));
 	}
+	private String printWarningsTable(List<FileReport> res) {
+		String[] headers = { "WarningFrom", "File", "Line", "Reason", "Solution" };
+		String[] whichHeading = { "todo", "copyright", "l_commentSeg", "javadoc" };
 
-
+		// TODO This is so messy
+		List<String[]> rows = new ArrayList<>();
+		for (FileReport f : res) {
+			Analysis[] analyses = f.getAnalyses();
+			for (int i = 0; i < analyses.length; i++) {
+				Analysis a = analyses[i];
+				for (Warning w : a.getWarnings()) {
+					rows.add(new String[] { whichHeading[i], f.getFileName(),
+							String.valueOf(w.lineOrigin.begin.line),
+							w.cause.toString(),
+							w.recommendedFix.toString() });
+				}
+			}
+		}
+		String[][] data = new String[rows.size()][];
+		for (int i = 0; i < rows.size(); i++)
+			data[i] = rows.get(i);
+		return ASCIITable.fromData(headers, data).withTableFormat(new ASCIITableFormat()).toString();
+	}
+	private String printMetricsTable(List<FileReport> res) {
+		String[] headers = { "Class Name", "todo", "copyright", "l_commentSeg", "javadoc" };
+		return TableUtil.fileReportsToTable(res, headers);
+	}
 	String[] executeModule() {
 		SourceRoot sourceRoot = new SourceRoot(Paths.get(ANALYSIS_ROOT));
 		return executeModule(sourceRoot);
