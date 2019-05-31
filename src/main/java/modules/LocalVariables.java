@@ -29,37 +29,64 @@ import java.util.Map;
  */
 public class LocalVariables implements ModuleInterface {
 
+	private int totalLocalVariables = 0;
+	private int totalMultiLine = 0;
+	private int totalRandoms = 0;
+
+	private List<FileReport> results;
+
 	@Override
 	public String getName() { return "LocalVariables"; }
 	@Override
 	public String getDescription() { return null; }
 	@Override
-	public String printMetrics() { return null; }
-
-	public String[] executeModule() {
-		final String ANALYSIS_ROOT = "resources/Example2";
-		SourceRoot sourceRoot = new SourceRoot(Paths.get(ANALYSIS_ROOT));
-		return executeModule(sourceRoot);
+	public String printMetrics() {
+		String[] headers = { "Class Name", "Local Variables", "same_line_vars", "multi_Random()", "Total File Score:" };
+		String returnString = "Breakdown: " + System.lineSeparator() + TableUtil.metricTablePrint(results, headers) + System.lineSeparator();
+		if (totalMultiLine != 0 && totalRandoms != 0)
+			returnString += "Warnings: " + System.lineSeparator() + TableUtil.printWarningsTable(results);
+		return returnString;
 	}
 	@Override
 	public String[] executeModule(SourceRoot sourceRoot) {
-		List<FileReport> results = new ArrayList<>();
 		try {
+			results = new ArrayList<>();
 			sourceRoot.tryToParse();
 			for (CompilationUnit unit : sourceRoot.getCompilationUnits()) {
-				results.add(analyse(unit));
+				results.add( analyse(unit) );
 			}
-			printMetricTable(results);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return new String[] {printMetricTable(results)};
+
+		if (results.isEmpty())  return new String[] {"No results"};
+		else                    return moduleOutput(results);
 	}
 
+
+	private String[] moduleOutput(List<FileReport> results) {
+		double finalScore = 0.0;
+		int totalFiles = results.size();
+
+		for (FileReport fileReport : results)
+			finalScore += fileReport.calcFileScore();
+
+		return new String[] {
+				getName(), "Total Files: " + totalFiles,
+				"Total Local Variables: " + totalLocalVariables,
+				"Total Multi-line Variables: " + totalMultiLine,
+				"Total Duplicate Random Objects: " + totalRandoms,
+				"Total Score: " + ((finalScore / totalFiles) * 100.0) + "%"
+		};
+	}
 
 	private FileReport analyse(CompilationUnit unit) {
 		FileReport fileReport = new FileReport(unit.getPrimaryTypeName().get(), unit.getStorage().get().getPath());
 		Map<String, List<VariableDeclarationExpr>> methodVariableMap = getMethodVariableMap(unit);
+
+		int totalVars = getVariableCountPerClass(methodVariableMap);
+		fileReport.setSum(totalVars);
+		totalLocalVariables += totalVars;
 
 		fileReport.setAnalyses(new Analysis[] {
 				findSameLineVariables(methodVariableMap),
@@ -69,19 +96,18 @@ public class LocalVariables implements ModuleInterface {
 	}
 
 
-
-	private String printMetricTable(List<FileReport> results) {
-		String[] headers = { "Class Name", "same_line_vars", "multi_rand"};
-		return TableUtil.fileReportsToTable(results, headers);
+	private int getVariableCountPerClass(Map<String, List<VariableDeclarationExpr>> methodVariableMap) {
+		final int[] sumOfVariables = { 0 };
+		methodVariableMap.forEach((k, v) -> sumOfVariables[0] += v.size());
+		return sumOfVariables[0];
 	}
-
 
 
 	private Analysis findSameLineVariables(Map<String, List<VariableDeclarationExpr>> methodVariableMap) {
 		Analysis fileAnal = new Analysis();
-		fileAnal.setOptimalValue(1); // Begin by assuming no variables exists on the same line
 		int totalVariables = 0;
 		int erroneousVariables = 0;
+		fileAnal.setOptimalValue(1); // Begin by assuming no variables exists on the same line
 
 		for (Map.Entry<String, List<VariableDeclarationExpr>> entry : methodVariableMap.entrySet()) {
 			String k = entry.getKey();
@@ -98,6 +124,7 @@ public class LocalVariables implements ModuleInterface {
 				totalVariables++;
 			}
 		}
+		totalMultiLine += erroneousVariables;
 
 		if (totalVariables != 0) fileAnal.setOptimalValue(1 - ((double) erroneousVariables / totalVariables));
 		return fileAnal;
@@ -124,6 +151,7 @@ public class LocalVariables implements ModuleInterface {
 					                                            "Create a single Random object and re-use it to enable better efficiency and bug prevention.",
 					                                            errRand.get(0).getRange().get()
 					                                           );
+					totalRandoms += errRand.size();
 					fileAnal.setOptimalValue(0);
 				}
 			}

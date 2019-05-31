@@ -17,7 +17,6 @@ import modules.helpers.TableUtil;
 import modules.helpers.Warning;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.*;
 
 import static com.github.javaparser.GeneratedJavaParserConstants.SINGLE_LINE_COMMENT;
@@ -34,8 +33,8 @@ import static com.github.javaparser.GeneratedJavaParserConstants.SINGLE_LINE_COM
  *                      a correct standard.
  */
 public class NumberOfComments implements ModuleInterface {
-	private static final String ANALYSIS_ROOT = "resources/Example2";
-	List<FileReport> results;
+	private List<FileReport> results;
+	private int totalComments = 0;
 
 	@Override
 	public String getName() { return "NumberOfComments"; }
@@ -52,67 +51,47 @@ public class NumberOfComments implements ModuleInterface {
 
 	@Override
 	public String printMetrics() {
-		return "Breakdown: "
-				       + printMetricsTable(results) + System.lineSeparator()
+		String[] headers = { "Class Name", "Comments", "todo_OV", "copyright_OV", "l_commentSeg_OV", "javadoc_OV", "Total File Score:" };
+		return "Breakdown: " + System.lineSeparator()
+				       + TableUtil.metricTablePrint(results, headers) + System.lineSeparator()
 				       + "Warnings: " + System.lineSeparator()
-				       + printWarningsTable(results);
-
-	}
-	private String printWarningsTable(List<FileReport> res) {
-		String[] headers = { "WarningFrom", "File", "Line", "Reason", "Solution" };
-		String[] whichHeading = { "todo", "copyright", "l_commentSeg", "javadoc" };
-
-		// TODO This is so messy
-		List<String[]> rows = new ArrayList<>();
-		for (FileReport f : res) {
-			Analysis[] analyses = f.getAnalyses();
-			for (int i = 0; i < analyses.length; i++) {
-				Analysis a = analyses[i];
-				for (Warning w : a.getWarnings()) {
-					rows.add(new String[] { whichHeading[i], f.getFileName(),
-							String.valueOf(w.lineOrigin.begin.line),
-							w.cause.toString(),
-							w.recommendedFix.toString() });
-				}
-			}
-		}
-		String[][] data = new String[rows.size()][];
-		for (int i = 0; i < rows.size(); i++)
-			data[i] = rows.get(i);
-		return ASCIITable.fromData(headers, data).withTableFormat(new ASCIITableFormat()).toString();
-	}
-	private String printMetricsTable(List<FileReport> res) {
-		String[] headers = { "Class Name", "todo", "copyright", "l_commentSeg", "javadoc" };
-		return TableUtil.fileReportsToTable(res, headers);
+				       + TableUtil.printWarningsTable(results);
 	}
 
-	
+
+
 	private String[] moduleOutput(List<FileReport> results) {
 		double[] averageSubMetrics = new double[4];
 		int totalFiles = results.size();
+		double finalScore = 0.0;
 
-		for (FileReport file : results)
+		for (FileReport file : results) {
+			finalScore += file.calcFileScore();
 			for (int i = 0; i < file.getAnalyses().length; i++)
 				averageSubMetrics[i] += file.getAnalyses()[i].getOptimalValue();
+		}
 
 		for (int i = 0; i < averageSubMetrics.length; i++)
 			averageSubMetrics[i] = averageSubMetrics[i] / (double) totalFiles;
 
 		return new String[] {
-				getName(), "totalFiles: " + totalFiles,
-				"AverageTodo: " + averageSubMetrics[0],
-				"AverageCopyRight: " + averageSubMetrics[1],
-				"AverageCommentSeg: " + averageSubMetrics[2],
-				"AverageJavadoc: " + averageSubMetrics[3]
+				getName(),
+				"totalFiles: "          + totalFiles,
+				"totalComments: "       + totalComments,
+				"AverageTodo: "         + String.format("%.2f", averageSubMetrics[0]),
+				"AverageCopyRight: "    + String.format("%.2f", averageSubMetrics[1]),
+				"AverageCommentSeg: "   + String.format("%.2f", averageSubMetrics[2]),
+				"AverageJavadoc: "      + String.format("%.2f", averageSubMetrics[3]),
+				"Total Score: "         + String.format("%.2f", ((finalScore / totalFiles) * 100.0)) + "%"
 		};
 	}
 
 
 	@Override
 	public String[] executeModule(SourceRoot sourceRoot) {
-		results = new ArrayList<>();
 		try {
 			sourceRoot.tryToParse();
+			results = new ArrayList<>();
 			for (CompilationUnit unit : sourceRoot.getCompilationUnits())
 				results.add(analyse(unit));
 		} catch (IOException e) {
@@ -134,13 +113,24 @@ public class NumberOfComments implements ModuleInterface {
 	 */
 	private FileReport analyse(CompilationUnit unit) {
 		FileReport fileReport = new FileReport(unit.getPrimaryTypeName().get(), unit.getStorage().get().getPath());
+		int commentCount = getCommentCount(unit);
+		totalComments += commentCount;
+
+		fileReport.setSum(commentCount);
 		fileReport.setAnalyses(new Analysis[] {
 				analyseTodo(unit),
 				analyseCopyright(unit),
 				analyseLineCommentSegmentation(unit),
 				analyseJavadoc(unit)
+
 		});
 		return fileReport;
+	}
+
+
+
+	private int getCommentCount(CompilationUnit unit) {
+		return unit.getAllContainedComments().size();
 	}
 
 
@@ -163,7 +153,7 @@ public class NumberOfComments implements ModuleInterface {
 			Boolean value = entry.getValue();
 			if (value) methodsConforming++;
 			else fileAnal.addWarning(
-					"No Javadoc associated with " + unit.getStorage().get().getFileName() + "::"+ key.getNameAsString(),
+					"No Javadoc associated with " + unit.getPrimaryTypeName().get() + "::"+ key.getNameAsString(),
 					"Add Javadoc or move if whitespace exists between method.",
 					key.getRange().get());
 		}
@@ -196,7 +186,6 @@ public class NumberOfComments implements ModuleInterface {
 	private Analysis analyseTodo(CompilationUnit unit) {
 		Analysis analysis = new Analysis();
 		List<String> criteria = new ArrayList<>(Arrays.asList("todo", "to-do", "fixme"));
-		int totalComments = unit.getAllContainedComments().size();
 		int todoFound = 0;
 
 		for (Comment c : unit.getAllContainedComments()) {

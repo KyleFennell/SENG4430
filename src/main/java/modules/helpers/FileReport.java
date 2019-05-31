@@ -12,31 +12,38 @@ import java.nio.file.Path;
 public class FileReport {
 	private final String fileName;
 	private final Path fileLocation;
+	private double fileScore;
+	private int sum;
 	private Analysis[] analyses;
 
 	public FileReport(String fileName, Path filePath) {
 		this.fileName = fileName;
 		this.fileLocation = filePath;
+		this.fileScore = 0;
+		this.sum = 0;
 	}
 
 
-	public String getFileName() {
-		return fileName;
+	public double calcFileScore() {
+		double score = 0.0;
+		for (Analysis a : analyses) {
+			score += a.getOptimalValue();
+		}
+		this.fileScore = score;
+		return score / analyses.length;
 	}
 
 
-	public Path getFileLocation() {
-		return fileLocation;
-	}
+	public double getFileScore()                    { return fileScore; }
+	public void setFileScore(double fileScore)      { this.fileScore = fileScore; }
 
+	public int getSum()                             { return sum; }
+	public void setSum(int sum)                     { this.sum = sum; }
 
-	public Analysis[] getAnalyses() {
-		return analyses;
-	}
+	public String getFileName()                     { return fileName; }
+	public Path getFileLocation()                   { return fileLocation; }
 
-
-	public void setAnalyses(Analysis[] analyses) {
-		this.analyses = analyses;
-	}
+	public Analysis[] getAnalyses()                 { return analyses; }
+	public void setAnalyses(Analysis[] analyses)    { this.analyses = analyses; }
 
 }
