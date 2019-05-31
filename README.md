@@ -1,6 +1,7 @@
 # SENG4430
 Software Qualify
-
+Project git repository
+- https://github.com/KyleFennell/SENG4430.git
 Code Samples for Testing:
 - https://github.com/sakalauskas/Java-Static-Analyzer/tree/master/src/main/java
 
