@@ -38,7 +38,7 @@ public class LocalVariables implements ModuleInterface {
 	@Override
 	public String getName() { return "LocalVariables"; }
 	@Override
-	public String getDescription() { return null; }
+	public String getDescription() { return "Analysis of local variables within a project."; }
 	@Override
 	public String printMetrics() {
 		String[] headers = { "Class Name", "Local Variables", "same_line_vars", "multi_Random()", "Total File Score:" };
