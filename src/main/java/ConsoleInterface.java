@@ -70,6 +70,8 @@ public class ConsoleInterface{
         ModuleManager.registerModule(new FogIndex());
         ModuleManager.registerModule(new StringMatchFanIn());
         ModuleManager.registerModule(new FanOut());
+        ModuleManager.registerModule(new NumberOfComments());
+        ModuleManager.registerModule(new LocalVariables());
     }
 
     /**
